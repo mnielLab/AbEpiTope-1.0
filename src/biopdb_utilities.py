@@ -1,5 +1,9 @@
 from Bio.PDB import PDBParser, NeighborSearch, Selection, Polypeptide
 import subprocess
+from pathlib import Path
+import sys
+MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
+sys.path.append(MODULE_DIR)
 
 def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", hmm_eval=float(1e-18), verbose=True):
     
@@ -135,7 +139,7 @@ def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
 
 def get_abag_interaction_data(ag_chains, ab_chains, return_bio_pdb_aas=False, atom_radius=4):
     
-    eptiope_data, paratope_data = [], []
+    epitope_data, paratope_data = [], []
 
     for ag_chain in ag_chains:
         for ab_chain in ab_chains:

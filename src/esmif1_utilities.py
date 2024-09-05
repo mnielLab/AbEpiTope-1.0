@@ -1,6 +1,10 @@
 from biopdb_utilities import read_pdb_structure
 import esm
 import torch
+from pathlib import Path
+import sys
+MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
+sys.path.append(MODULE_DIR)
 
 class ESMIF1Model():
     
@@ -69,7 +73,7 @@ class ESMIF1Model():
             
             # prepare encoder outputs for saving
             target_chain_len = coords[c].shape[0]
-            enc_out = enc_out[esmif1_enc_dataencoder_out"][0][1:-1, 0]
+            enc_out = enc_out["encoder_out"][0][1:-1, 0]
             enc_out = enc_out[:target_chain_len].cpu().detach()
             
             return enc_out
