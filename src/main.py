@@ -145,7 +145,7 @@ class StructureData():
 
         #this will load the esmif1 model + alphabet
         print("Loading ESM-IF1 model...")
-        esmif1_util = ESMIF1Model()
+        esmif1_util = ESMIF1Model()# .to(device)
         print("Loading ESM-IF1 model... DONE")
     
         for structure_file in structure_files:

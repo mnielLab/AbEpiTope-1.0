@@ -8,10 +8,15 @@ sys.path.append(MODULE_DIR)
 
 class ESMIF1Model():
     
-    def __init__(self):
+    def __init__(self, device=None):
 
-        esmif1_model, self.alphabet = esm.pretrained.esm_if1_gvp4_t16_142M_UR50() 
-        self.esmif1_model = esmif1_model.eval()
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
+
+        esmif1_model, self.alphabet = esm.pretrained.esm_if1_gvp4_t16_142M_UR50()
+        self.esmif1_model = esmif1_model.eval().to(self.device)
 
     def compute_esmif1_on_protein(self, pdb_file):
         """
@@ -56,14 +61,14 @@ class ESMIF1Model():
     def esmif1encs_forwardpass(self, model, alphabet, coords, c, seq):
 
         with torch.no_grad():
-            device = next(model.parameters()).device
+            #device = next(model.parameters()).device
             coord_cat = esm.inverse_folding.multichain_util._concatenate_coords(coords, c)
             batch_converter = esm.inverse_folding.util.CoordBatchConverter(alphabet)
             
             batch = [(coord_cat, None, seq)]
             
-            batch_coords, confidence, _, tokens, padding_mask = batch_converter(batch, device=device)
-            prev_output_tokens = tokens[:, :-1].to(device) 
+            batch_coords, confidence, _, tokens, padding_mask = batch_converter(batch, device=self.device)
+            prev_output_tokens = tokens[:, :-1].to(self.device) 
 
             # gvp transformer encoder forward pass 
             enc_out = model.encoder.forward(
