@@ -128,7 +128,7 @@ class StructureData():
             device: pytorch device to use, default is cuda if available else cpu.
         """
     
-    def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4):
+    def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4, esmif1_modelpath=None):
         #look for .pdb or .cif files
         if not structure_directory.is_dir(): 
             print(f"Specified structure directory: {structure_directory} did not exist.")
@@ -145,7 +145,7 @@ class StructureData():
 
         #this will load the esmif1 model + alphabet
         print("Loading ESM-IF1 model...")
-        esmif1_util = ESMIF1Model()# .to(device)
+        esmif1_util = ESMIF1Model(esmif1_modelpath=esmif1_modelpath)
         print("Loading ESM-IF1 model... DONE")
     
         for structure_file in structure_files:

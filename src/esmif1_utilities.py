@@ -3,20 +3,40 @@ import esm
 import torch
 from pathlib import Path
 import sys
+import time
+
 MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
 
 class ESMIF1Model():
     
-    def __init__(self, device=None):
+    def __init__(self, device=None, esmif1_modelpath=None):
 
         if device is None:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
 
-        esmif1_model, self.alphabet = esm.pretrained.esm_if1_gvp4_t16_142M_UR50()
+        model_name = "esm_if1_gvp4_t16_142M_UR50"
+        torch_hubdir = torch.hub.get_dir()
+        torch_hubfile = Path(torch_hubdir) / "checkpoints" / f"{model_name}.pt"
+
+        #download model from torchhub, (esmif1 source code hardcoded to load onto cpu)
+        if esmif1_modelpath is None and not torch_hubfile.is_file():
+            esmif1_model, alphabet = esm.pretrained.esm_if1_gvp4_t16_142M_UR50()       
+
+        #if model already in torchhub, load directly onto device for speed up 
+        elif esmif1_modelpath is None and torch_hubfile.is_file():
+            model_data = torch.load(str(torch_hubfile), map_location=self.device)
+            esmif1_model, alphabet = esm.pretrained.load_model_and_alphabet_core(model_name, model_data, None)
+
+        #load model from specified location
+        else:
+            model_data = torch.load(str(esmif1_modelpath), map_location=self.device)
+            esmif1_model, alphabet = esm.pretrained.load_model_and_alphabet_core(model_name, model_data, None)
+
         self.esmif1_model = esmif1_model.eval().to(self.device)
+        self.alphabet = alphabet
 
     def compute_esmif1_on_protein(self, pdb_file):
         """
