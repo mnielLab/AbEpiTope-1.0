@@ -1,10 +1,11 @@
-from src.main import StructureData, AntiInterNet, AntiScout
-
+from src.main import StructureData, EvalAbAgs
 from pathlib import Path
-PDBDIR = Path("/home/projects/vaccine/people/joacli/AntiInterNet-1.0/sample_pdbs")
-ENCDIR = Path("/home/projects/vaccine/people/joacli/AntiInterNet-1.0/output/encodings")
-TMPDIR = Path("/home/projects/vaccine/people/joacli/AntiInterNet-1.0/output/temporary")
-
+PDBDIR = Path.cwd() / "sample_pdbs"
+ENCDIR = Path.cwd() / "encodings"
+TMPDIR = Path.cwd() / "temporary"
+OUTDIR = Path.cwd() / "output"
 #making the inverse folding encodings takes a while...
 data = StructureData()
 data.encode_proteins(PDBDIR, ENCDIR, TMPDIR)
+eval_abags = EvalAbAgs(data)
+eval_abags.predict(OUTDIR)
