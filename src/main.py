@@ -37,6 +37,7 @@ else:
 
 ### MODEL ###
 
+
 class DenseNet(nn.Module):
     """
     DenseNet used for finetuning ESM-IF1 to AntiInterNet-1.0 and AntiScout-1.0
@@ -50,8 +51,8 @@ class DenseNet(nn.Module):
                  fc1_dropout = 0.6,
                  fc2_dropout = 0.65,
                  fc3_dropout = 0.5,
-                 num_classes = 1, add_pTM=False, add_ipTM=False, add_hcdr3_I=False,
-                 add_norm=False):
+                 num_classes = 1):
+
         super(DenseNet, self).__init__()
 
 
@@ -61,17 +62,8 @@ class DenseNet(nn.Module):
         self.fc1_dropout = fc1_dropout
         self.fc2_dropout = fc2_dropout
         self.fc3_dropout = fc3_dropout
-
-        #increase FFNN inputs, if additional features are used
         ff_input_size = embedding_size
-        if add_pTM: ff_input_size += 1
-        if add_ipTM: ff_input_size += 1
-        if add_hcdr3_I: ff_input_size += 1
-        if ff_input_size != embedding_size: self.added_features = True
-        else: self.added_features = False
-
-        #normalize input features or not
-        self.add_norm = add_norm
+      
 
         self.ff_model = nn.Sequential(nn.Linear(ff_input_size, fc1_size),
                                       nn.ReLU(),
@@ -89,43 +81,20 @@ class DenseNet(nn.Module):
         """
         X: list of tensors. Each tensor, (embed size)
         """
-        #if additional features were added
-        if self.added_features:
-            x = [d[0] for d in X]
-            add_features = [torch.tensor(d[1]) for d in X]
 
-            #convert to batch dimension
-            x = torch.stack(x)
-            x = x.to(device)
-            #create feature vector
-            add_features = torch.stack(add_features) #.unsqueeze(dim=0)
-            add_features = add_features.to(device)
-
-            #apply z-score normalization
-            if self.add_norm:
-                add_features = (add_features - add_features.mean(dim=1, keepdim=True)) / add_features.std(dim=1, keepdim=True)
-                x = (x - x.mean(dim=1, keepdim=True)) / x.std(dim=1, keepdim=True)
-            #concatentate added features
-
-            x = torch.cat((x, add_features), axis=1)
-
-        #dont add additional featqures
-        else:
-            #convert to batch dimension
-            x = torch.stack(X)
-            x = x.to(device)
+        x = torch.stack(X)
+        x = x.to(device)
         output = self.ff_model(x)
 
         return output
+
 
 ### CLASSES ###
 
 class StructureData():
     def __init__(self):
         """
-        Initialize Antigens class object
-        Inputs:
-            device: pytorch device to use, default is cuda if available else cpu.
+   
         """
     
     def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4, esmif1_modelpath=None):
@@ -138,8 +107,10 @@ class StructureData():
         pdb_files = list(structure_directory.glob("*.pdb"))
         cif_files = list(structure_directory.glob("*.cif"))
         structure_files = pdb_files + cif_files
+
         esmif1_enc_files, esmif1_interface_encs = [], []
-        
+        epitope_datas, paratope_datas = [], []
+
         if not enc_directory.is_dir(): enc_directory.mkdir(parents=True)
         if not tmp_directory.is_dir(): tmp_directory.mkdir(parents=True)
 
@@ -151,7 +122,6 @@ class StructureData():
         for structure_file in structure_files:
 
             #compute esmif1 encoding for protein
-
             print(f"Encoding structure from file: {structure_file.name}...")
             esmif1_enc_file = enc_directory / f"{structure_file.stem}.pickle"
             esmif1_enc_data = esmif1_util.compute_esmif1_on_protein(structure_file)
@@ -163,7 +133,6 @@ class StructureData():
             nr_seqs = len(esmif1_enc)
             enc_idx_lookup = {esmif1_enc_data["chain_ids"][i]:i for i in range(nr_seqs)}
             
-
             print("Extracting interface antibody-antigen inteface encoding... ")
             #identify heavy, light and antigen chains 
             heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, tmp_directory, pdb_id=structure_file.stem, verbose=False)
@@ -173,8 +142,12 @@ class StructureData():
             epitope_data, paratope_data = get_abag_interaction_data(antigen_chains, antibody_chains, return_bio_pdb_aas=False, atom_radius=atom_radius)
             epitope_enc = [esmif1_enc[enc_idx_lookup[e[1]]][e[2]] for e in epitope_data]
             paratope_enc = [esmif1_enc[enc_idx_lookup[p[1]]][p[2]] for p in paratope_data]
+
             interface_enc = torch.stack(epitope_enc + paratope_enc)
             interface_enc_avg = torch.mean(interface_enc, axis=0)
+
+            epitope_datas.append(epitope_data)
+            paratope_datas.append(paratope_data)
         
             esmif1_enc_files.append(esmif1_enc_file)
             esmif1_interface_encs.append(interface_enc_avg)
@@ -183,10 +156,12 @@ class StructureData():
         self.structure_files = structure_files
         self.esmif1_enc_files = esmif1_enc_files
         self.esmif1_interface_encs = esmif1_interface_encs
+        self.epitope_datas = epitope_datas
+        self.paratope_datas = paratope_datas
             
-        
-class AntiInterNet():
-    
+
+class EvalAbAgs():
+
     def __init__(self,
                  structuredata,
                  device = None):
@@ -202,27 +177,34 @@ class AntiInterNet():
             self.device = device
 
         self.structuredata = structuredata
-        self.model = DenseNet()
-        self.modelstates = list(ANTIINTERNET_MODELS.glob("*"))
 
+    def predict(self, outpath):
 
-    def ensemble_predict(self):
-        """
-        INPUTS: antigens: Antigens() class object.  
+        antiinternet_scores, _ = self.antiinternet()
+        antiscout_scores, _ = self.antiscout()
+
+        print("Creating output files...")
+        structure_files = self.structuredata.structure_files
+        epitope_datas = self.structuredata.epitope_datas
+        paratope_datas = self.structuredata.paratope_datas
+        self.create_csvfile(structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath)
+        print("Creating output files... DONE")
+
         
-        OUTPUTS:
-                No outputs. Stores probabilities of ensemble models in Antigens() class object.
-                Run bp3_pred_variable_threshold() or bp3_pred_majority_vote() afterwards to make predictions. 
+    def antiinternet(self):
         """
-
+      
+        """
         
-        model = self.model
-        modelstates = self.modelstates
+        print("Running AntiInterNet")
+        model = DenseNet().to(device)
+        modelstates = list(ANTIINTERNET_MODELS.glob("*"))
         nr_models = len(modelstates)
         interface_encs = self.structuredata.esmif1_interface_encs
-        structure_datafiles = self.structuredata.structure_files
+        structure_files = self.structuredata.structure_files
+        
         nr_structures = len(interface_encs)
-        print("Running AntiInterNet")
+        
         model_outputs = []
         model_outputs = torch.zeros((nr_models, nr_structures))
         for i in range(nr_models):
@@ -234,53 +216,27 @@ class AntiInterNet():
                 model_output = model(interface_encs)
                 model_outputs[i] = torch.flatten(model_output).detach().cpu()
 
-
-        avg_model_output = torch.mean(model_outputs, axis=0)
-        score_dict = {structure_datafiles[i].name:avg_model_output[i].item() for i in range(nr_structures)}
+        avg_model_outputs = torch.mean(model_outputs, axis=0)
+        print("Running AntiInterNet-1.0... DONE")
         
-        return score_dict
+        return avg_model_outputs, structure_files
 
 
-class AntiScout():
-    
-    def __init__(self,
-                 structuredata,
-                 device = None):
+    def antiscout(self):
         """
-        Inputs and initialization:
-            structuredata: Structure class object
-            device: pytorch device to use, default is cuda if available else cpu.
-        """
-        
-        if device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = device
-
-        self.structuredata = structuredata
-        self.model = DenseNet(fc1_size=450, fc2_size=250, fc3_size=50, num_classes=2)
-        self.modelstates = list(ANTISCOUT_MODELS.glob("*"))
-
-    def ensemble_predict(self):
-        """
-        INPUTS: antigens: Antigens() class object.  
-        
-        OUTPUTS:
-                No outputs. Stores probabilities of ensemble models in Antigens() class object.
-                Run bp3_pred_variable_threshold() or bp3_pred_majority_vote() afterwards to make predictions. 
+      
         """
 
-        ensemble_probs = list()
-        threshold_keys = list()
-        softmax_function = nn.Softmax(dim=1).to(device)
-        
-        model = self.model
-        modelstates = self.modelstates
+        print("Running AntiScout-1.0...")
+        model = DenseNet(fc1_size=450, fc2_size=250, fc3_size=50, num_classes=2).to(device)
+        modelstates = list(ANTISCOUT_MODELS.glob("*"))
+        softmax_function = nn.Softmax(dim=1).to(device)          
+
         nr_models = len(modelstates)
         interface_encs = self.structuredata.esmif1_interface_encs
-        structure_datafiles = self.structuredata.structure_files
+        structure_files = self.structuredata.structure_files
         nr_structures = len(interface_encs)
-        print("Generating AntiScout scores")
+        
         model_outputs = []
         model_outputs = torch.zeros((nr_models, nr_structures))
         for i in range(nr_models):
@@ -294,6 +250,35 @@ class AntiScout():
                 model_outputs[i] = model_probs 
                 
                 
-        avg_model_output = torch.mean(model_outputs, axis=0)
-        score_dict = {structure_datafiles[i].name:avg_model_output[i].item() for i in range(nr_structures)}
-        return score_dict 
+        avg_model_outputs = torch.mean(model_outputs, axis=0)
+        print("Running AntiScout-1.0... DONE")
+
+        return avg_model_outputs, structure_files
+
+    def create_csvfile(self, structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath):
+
+        #create .csv content
+        scores = list( zip(structure_files, antiinternet_scores, antiscout_scores)) 
+        interfaces = list( zip(structure_files, epitope_datas, paratope_datas) )
+        score_csv_content, interface_csv_content = ["FileName,AntiInterNet-1.0,AntiScout-1.0"], ["FileName,EpitopeResidue,ParatopeResidue"]
+
+        for score in scores:
+            structure_file, antiinternet_score, antiscout_score = score
+            antiinternet_score, antiscout_score = str(antiinternet_score.item()), str(antiscout_score.item())
+            score_csv_content.append(f"{structure_file.name},{antiinternet_score},{antiscout_score}")
+
+
+        for interface in interfaces:
+            structure_file, epitope_data, paratope_data = interface
+            nr_residues = len(epitope_data)
+            interface_csv_content.extend( [f"{structure_file.name},{epitope_data[i]},{paratope_data[i]}" for i in range(nr_residues)])
+        
+
+        score_csv_content = "\n".join(score_csv_content)
+        interface_csv_content = "\n".join(interface_csv_content)
+
+        #write to .csv file 
+        if not outpath.parent.is_dir(): outpath.parent.mkdir(parents=True)
+        with open(outpath / "output.csv", "w") as outfile: outfile.write(score_csv_content)
+        with open(outpath / "interace.csv", "w") as outfile: outfile.write(interface_csv_content)
+        
