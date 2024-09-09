@@ -10,11 +10,15 @@ It is important that you follow the steps and do not install a latest pytorch an
 The reason is that we need the installation to be compatible with a Pytorch Geometric.
 
 ### Create Conda Environment
+```
 $ conda create -n inverse python=3.9 ## important that it is python version 3.9
 $ conda activate 
 $ conda install pytorch=1.11 cudatoolkit=11.3 -c pytorch   ## very important to specify pytorch package!
 $ conda install pyg -c pyg -c conda-forge ## very important to make sure pytorch and cuda versions not being changed
 $ conda install pip
-
+```
 ### Install Pip Packages 
-$ pip install -r requirements.txt
+```
+$ pip install -r requirements.txt #install package dependencies
+$ pip install # install antiinternet and antiscout source code
+```
