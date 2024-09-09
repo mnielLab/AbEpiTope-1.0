@@ -1,0 +1,3 @@
+include antiinternet/models/antiinternet1.0/*.pt
+include antiinternet/models/antiscout1.0/*.pt
+include antiinternet/models/hmm_antibody_identification/*.hmm
