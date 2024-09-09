@@ -1,4 +1,4 @@
-from src.main import StructureData, EvalAbAgs
+from antiinternet.main import StructureData, EvalAbAgs
 from pathlib import Path
 PDBDIR = Path.cwd() / "sample_pdbs"
 ENCDIR = Path.cwd() / "encodings"

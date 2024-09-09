@@ -3,7 +3,7 @@
 # Copyright (C) 2020 Howard Hughes Medical Institute.
 # Freely distributed under the BSD open source license.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# query HMM file:                  /home/projects/vaccine/people/joacli/AntiInterNet-1.0/src/models/hmm_antibody_identification/heavy.hmm
+# query HMM file:                  /home/projects/vaccine/people/joacli/AntiInterNet-1.0/antiinternet/models/hmm_antibody_identification/heavy.hmm
 # target sequence database:        /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/chain_seq_tmp.fasta
 # output directed to file:         /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/heavy_chains
 # show alignments in output:       no
@@ -36,6 +36,6 @@ Passed Fwd filter:                         1  (1); expected 0.0 (1e-05)
 Initial search space (Z):                  1  [actual number of targets]
 Domain search space  (domZ):               0  [number of targets reported over threshold]
 # CPU time: 0.00u 0.00s 00:00:00.00 Elapsed: 00:00:00.00
-# Mc/sec: 8.40
+# Mc/sec: 7.85
 //
 [ok]
