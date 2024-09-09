@@ -120,7 +120,7 @@ def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
         for residue in chain_residues:
     
             try:
-                aa = Polypeptide.three_to_one(residue.get_resname())
+                aa = Polypeptide.protein_letters_3to1[residue.get_resname()]#three_to_one(residue.get_resname())
             #when residue is something nonstandard
             except KeyError:
                 print("Non-standard amino acid detected")
@@ -196,9 +196,9 @@ def get_epitope_paratope_data(paired_residues, ag_chain, lc_or_hc, return_bio_pd
             sys.exit(f"Could not find paired residues in bio pdb residue list: {pair}")
 
         if not return_bio_pdb_aas:
-            #get amino acid name
-            epi_res = Polypeptide.three_to_one(epi_res.get_resname())
-            para_res = Polypeptide.three_to_one(para_res.get_resname())
+            #get amino acid name'
+            epi_res = Polypeptide.protein_letters_3to1[epi_res.get_resname()]
+            para_res = Polypeptide.protein_letters_3to1[para_res.get_resname()]
 
         epitope_data.append((epi_res, ag_id, epi_res_idx) )
         paratope_data.append( (para_res, ab_id, para_res_idx) )
@@ -212,7 +212,7 @@ def write_pdb_res_to_seq(residues):
     AA_seq = str()
     for residue in residues:
         try:
-            aa = Polypeptide.three_to_one(residue.get_resname())
+            aa = Polypeptide.protein_letters_3to1[residue.get_resname()]
         #when residue is something nonstandard
         except KeyError:
             print("Non-standard amino acid detected")

@@ -280,5 +280,5 @@ class EvalAbAgs():
         #write to .csv file 
         if not outpath.parent.is_dir(): outpath.parent.mkdir(parents=True)
         with open(outpath / "output.csv", "w") as outfile: outfile.write(score_csv_content)
-        with open(outpath / "interace.csv", "w") as outfile: outfile.write(interface_csv_content)
+        with open(outpath / "interface.csv", "w") as outfile: outfile.write(interface_csv_content)
         
