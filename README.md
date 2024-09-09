@@ -20,5 +20,5 @@ $ conda install pip
 ### Install Pip Packages 
 ```
 $ pip install -r requirements.txt #install package dependencies
-$ pip install # install antiinternet and antiscout source code
+$ pip install git+ssh://git@github.com/mnielLab/AntiInterNet-1.0.git #install source code directly with pip
 ```
