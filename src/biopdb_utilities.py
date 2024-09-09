@@ -4,6 +4,8 @@ from pathlib import Path
 import sys
 MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
+AA3to1_DICT = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I', 'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S', 'THR': 'T', 'VAL': 'V', 'TRP': 'W', 'TYR': 'Y'}
+
 
 def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", hmm_eval=float(1e-18), verbose=True):
     
@@ -120,7 +122,7 @@ def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
         for residue in chain_residues:
     
             try:
-                aa = Polypeptide.protein_letters_3to1[residue.get_resname()]#three_to_one(residue.get_resname())
+                aa = AA3to1_DICT[residue.get_resname()]#three_to_one(residue.get_resname())
             #when residue is something nonstandard
             except KeyError:
                 print("Non-standard amino acid detected")
@@ -197,8 +199,8 @@ def get_epitope_paratope_data(paired_residues, ag_chain, lc_or_hc, return_bio_pd
 
         if not return_bio_pdb_aas:
             #get amino acid name'
-            epi_res = Polypeptide.protein_letters_3to1[epi_res.get_resname()]
-            para_res = Polypeptide.protein_letters_3to1[para_res.get_resname()]
+            epi_res = AA3to1_DICT[epi_res.get_resname()]
+            para_res = AA3to1_DICT[para_res.get_resname()]
 
         epitope_data.append((epi_res, ag_id, epi_res_idx) )
         paratope_data.append( (para_res, ab_id, para_res_idx) )
@@ -212,7 +214,7 @@ def write_pdb_res_to_seq(residues):
     AA_seq = str()
     for residue in residues:
         try:
-            aa = Polypeptide.protein_letters_3to1[residue.get_resname()]
+            aa = AA3to1_DICT[residue.get_resname()]
         #when residue is something nonstandard
         except KeyError:
             print("Non-standard amino acid detected")
