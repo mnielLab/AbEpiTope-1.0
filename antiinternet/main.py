@@ -18,8 +18,6 @@ from esmif1_utilities import ESMIF1Model
 from biopdb_utilities import identify_abag_with_hmm, get_abag_interaction_data
 from utilities import load_pickle_file
 
-
-
 ### STATIC PATHS ###
 ROOT_DIRECTORY = Path( Path(__file__).parent.resolve() )
 MODELS_DIRECTORY = ROOT_DIRECTORY / "models"
@@ -54,8 +52,6 @@ class DenseNet(nn.Module):
                  num_classes = 1):
 
         super(DenseNet, self).__init__()
-
-
         self.fc1_size = fc1_size
         self.fc2_size = fc2_size
         self.fc3_size = fc3_size
@@ -104,10 +100,8 @@ class StructureData():
             return 
 
     
-        pdb_files = list(structure_directory.glob("*.pdb"))
-        cif_files = list(structure_directory.glob("*.cif"))
-        structure_files = pdb_files + cif_files
-
+        structure_files = list(structure_directory.glob("*.pdb"))
+        
         esmif1_enc_files, esmif1_interface_encs = [], []
         epitope_datas, paratope_datas = [], []
 
