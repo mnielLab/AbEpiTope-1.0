@@ -100,7 +100,7 @@ class StructureData():
             return 
 
     
-        structure_files = list(structure_directory.glob("*.pdb"))
+        structure_files = list(structure_directory.glob("**/*.pdb"))
         
         esmif1_enc_files, esmif1_interface_encs = [], []
         epitope_datas, paratope_datas = [], []
