@@ -94,14 +94,17 @@ class StructureData():
         """
     
     def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4, esmif1_modelpath=None):
-        #look for .pdb or .cif files
-        if not structure_directory.is_dir(): 
-            print(f"Specified structure directory: {structure_directory} did not exist.")
-            return 
+        # a single pdb file
+        if structure_directory.is_file(): structure_files = [structure_directory]
 
-    
-        structure_files = list(structure_directory.glob("**/*.pdb"))
-        
+        #directory with pdb files
+        elif structure_directory.is_dir(): 
+            structure_files = list(structure_directory.glob("**/*.pdb"))
+
+        else:
+            print(f"Structure(s) input did not exist. Not a file or a directory. Exiting!")
+            return
+         
         esmif1_enc_files, esmif1_interface_encs = [], []
         epitope_datas, paratope_datas = [], []
 
