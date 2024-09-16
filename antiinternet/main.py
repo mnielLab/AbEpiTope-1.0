@@ -221,7 +221,7 @@ class EvalAbAgs():
 
         # write fail files
         faildata = self.structuredata.failed_files
-        if faildata: self.write_failed_files(faildata, outpath / "failed_files.txt")
+        if faildata: self.write_failed_files(faildata, outpath / "failed_files.csv")
             
         
         print("Creating output files... DONE")
