@@ -1,11 +1,11 @@
-from Bio.PDB import PDBParser, NeighborSearch, Selection, Polypeptide
+from Bio.PDB import PDBParser, MMCIFParser, NeighborSearch, Selection, Polypeptide
 import subprocess
 from pathlib import Path
 import sys
+import pdb
 MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
 AA3to1_DICT = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I', 'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S', 'THR': 'T', 'VAL': 'V', 'TRP': 'W', 'TYR': 'Y'}
-
 
 def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", hmm_eval=float(1e-18), verbose=True):
     
@@ -16,12 +16,17 @@ def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", h
     light_lambda_hmm = hmm_models_directory / "lambda.hmm"
     light_kappa_hmm = hmm_models_directory / "kappa.hmm"
     tmp_fastafile = tmp / "tmp.fasta"
-
     
     heavy_chain, light_chain, antigen_chains = [], [], [] 
 
+    if is_pdb_file_biopython(abag_path): model = read_pdb_structure(abag_path)
+    elif is_cif_file_biopython(abag_path): model = read_cif_structure(abag_path)
 
-    model = read_pdb_structure(abag_path)
+    else:
+        print("Could not recognize {abag_path} as a pdb or cif file")
+        return [], [], []
+
+
     for chain in model:
 
         #create a temporary fasta file for chain
@@ -72,10 +77,25 @@ def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", h
             if verbose: print(f"Antigen chain: {chain_id}")
             antigen_chains.append(chain)
 
-        else: sys.exit(f"Oh no! {agab_complex_path}")
-
 
     return heavy_chain, light_chain, antigen_chains
+
+def is_pdb_file_biopython(file_path):
+    parser = PDBParser(QUIET=True)
+    try:
+        structure = parser.get_structure('pdb_structure', file_path)
+        return True  # If no exception is raised, it's a valid PDB file
+    except Exception as e:
+        return False
+
+
+def is_cif_file_biopython(file_path):
+    parser = MMCIFParser(QUIET=True)
+    try:
+        structure = parser.get_structure('pdb_structure', file_path)
+        return True  # If no exception is raised, it's a valid PDB file
+    except Exception as e:
+        return False
 
 def read_pdb_structure(pdb_file, pdb_id="foo", modelnr=0, return_all_models = False):
         """
@@ -98,6 +118,26 @@ def read_pdb_structure(pdb_file, pdb_id="foo", modelnr=0, return_all_models = Fa
         #return only desired model
         else: return structure[modelnr]
 
+def read_cif_structure(cif_file, pdb_id="foo", modelnr=0, return_all_models=False):
+    """
+    Reads a CIF file and returns a specific model or all models in the structure.
+    
+    cif_file: path to the CIF file.
+    pdb_id: PDB accession, string (default is 'foo').
+    modelnr: The model number to return (default is 0).
+    return_all_models: If True, returns all models in the structure.
+    
+    Returns the specified model or all models if return_all_models is True.
+    """
+    assert isinstance(modelnr, int), f"Model number needs to be a valid integer, it was {modelnr}"
+    parser = MMCIFParser()
+    structure = parser.get_structure(pdb_id, cif_file)
+
+    if return_all_models:
+        models = list(structure.get_models())
+        return models
+    else:
+        return structure[modelnr]
 
 def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
     """
@@ -113,20 +153,25 @@ def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
     
     fasta_file_content = str()
     AA_seqs = list()
+    #remove hetero atoms
+    for chain in chains: get_and_remove_heteroatoms(chain)
+
     for chain in chains:
 
         chain_id = chain.get_id()
         chain_residues = Selection.unfold_entities(chain, "R")
-        AA_seq = str()
         
+        AA_seq = str()
+
         for residue in chain_residues:
-    
+        
             try:
-                aa = AA3to1_DICT[residue.get_resname()]#three_to_one(residue.get_resname())
+                aa = AA3to1_DICT[residue.get_resname()]
             #when residue is something nonstandard
             except KeyError:
+                print(aa)
                 print("Non-standard amino acid detected")
-                aa = "x"
+                aa = "X"
     
             AA_seq += aa
 
@@ -138,6 +183,24 @@ def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
             outfile.write(fasta_file_content[:-1])
 
     return AA_seqs
+
+
+def get_and_remove_heteroatoms(chain):
+    """
+   Heteroatoms in the form of water and other solvents need to be removed from the chain.
+   Inputs: chain id
+
+    """
+    residues = Selection.unfold_entities(chain, "R")
+    heteroatom_residue_ids = list()
+    for residue in residues:
+        residue_id = residue.get_full_id()
+
+        #residue is a heteroatom
+        if residue_id[3][0] != " ":
+            heteroatom_residue_ids.append(residue_id[3])
+    #remove all heteroatoms
+    [chain.detach_child(ids) for ids in heteroatom_residue_ids]
 
 def get_abag_interaction_data(ag_chains, ab_chains, return_bio_pdb_aas=False, atom_radius=4):
     
@@ -178,9 +241,9 @@ def get_epitope_paratope_data(paired_residues, ag_chain, lc_or_hc, return_bio_pd
     antibody_residues = list(lc_or_hc.get_residues())
 
 
-
     epitope_data = []
     paratope_data = []
+
     ag_seq = write_pdb_res_to_seq(antigen_residues)
     lc_or_hc_seq = write_pdb_res_to_seq(antibody_residues)
     #create dict with indexes.
@@ -212,11 +275,14 @@ def write_pdb_res_to_seq(residues):
     residues: Bio PDB residues
     """
     AA_seq = str()
+    get_and_remove_heteroatoms(residues)
+
     for residue in residues:
         try:
             aa = AA3to1_DICT[residue.get_resname()]
         #when residue is something nonstandard
         except KeyError:
+            print(aa)
             print("Non-standard amino acid detected")
             aa = "X"
 

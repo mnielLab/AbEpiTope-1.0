@@ -1,4 +1,4 @@
-from biopdb_utilities import read_pdb_structure
+from biopdb_utilities import read_pdb_structure, is_pdb_file_biopython, is_cif_file_biopython, read_cif_structure
 import esm
 import torch
 from pathlib import Path
@@ -42,22 +42,23 @@ class ESMIF1Model():
         """
         """
 
-        esmif1_encs, sequence_order, chain_ids = self.compute_esmif1_on_pdb(pdb_file)
-        nr_chains = len(chain_ids)
-
-        #temporaray placeholders
-        sequence_order = [i for i in range(nr_chains)]
-            
+        esmif1_encs, sequence_order, chain_ids = self.compute_esmif1_on_pdb(pdb_file)        
         #save esm-if1 encoding
-        esmif1_enc_data = {"encs": esmif1_encs, "sequences":sequence_order, "chain_ids": chain_ids}
-        #with open(esmif1_enc_out, "wbesmif1_enc_data) as outfile: pickle.dump(esmif1_enc_data, outfile, protocol=-1)
+        esmif1_enc_data = {"encs": esmif1_encs, "chain_ids": chain_ids}
 
         return esmif1_enc_data 
 
 
     def compute_esmif1_on_pdb(self, pdb_file):
 
-        structure = read_pdb_structure(pdb_file)
+
+        if is_pdb_file_biopython(pdb_file): structure = read_pdb_structure(pdb_file)
+        elif is_cif_file_biopython(pdb_file): structure = read_cif_structure(pdb_file)
+        else: structure = None
+
+        if structure == None:
+            return None, None, None
+        
         esmif1_encs, sequence_order = [], []
         #load abag complex into esm-if1
         chain_names = [c.get_id() for c in structure.get_chains()]

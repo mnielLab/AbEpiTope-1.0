@@ -98,8 +98,8 @@ class StructureData():
         if structure_directory.is_file(): structure_files = [structure_directory]
 
         #directory with pdb files
-        elif structure_directory.is_dir(): 
-            structure_files = list(structure_directory.glob("**/*.pdb"))
+        elif structure_directory.is_dir():
+            structure_files = list(structure_directory.glob("**/*.pdb")) + list(structure_directory.glob("**/*.PDB")) + list(structure_directory.glob("**/*.cif")) + list(structure_directory.glob("**/*.CIF"))
 
         else:
             print(f"Structure(s) input did not exist. Not a file or a directory. Exiting!")
@@ -107,6 +107,7 @@ class StructureData():
          
         esmif1_enc_files, esmif1_interface_encs = [], []
         epitope_datas, paratope_datas = [], []
+        success_files, failed_files = [], [] 
 
         if not enc_directory.is_dir(): enc_directory.mkdir(parents=True)
         if not tmp_directory.is_dir(): tmp_directory.mkdir(parents=True)
@@ -122,11 +123,17 @@ class StructureData():
             print(f"Encoding structure from file: {structure_file.name}...")
             esmif1_enc_file = enc_directory / f"{structure_file.stem}.pickle"
             esmif1_enc_data = esmif1_util.compute_esmif1_on_protein(structure_file)
+            
             with open(esmif1_enc_file, "wb") as outfile: pickle.dump(esmif1_enc_data, outfile, protocol=-1) 
             esmif1_enc_data = load_pickle_file(esmif1_enc_file)
             print(f"Encoding structure from file: {structure_file.name}... DONE")
 
             esmif1_enc = esmif1_enc_data["encs"]
+            if esmif1_enc == None:
+                print(f"Structure file {structure_file.name} was not detected as pdb or cif file. No score will be computed for it.")
+                failed_files.append((structure_file.name, "Not a PDB/CIF"))
+                continue
+
             nr_seqs = len(esmif1_enc)
             enc_idx_lookup = {esmif1_enc_data["chain_ids"][i]:i for i in range(nr_seqs)}
             
@@ -134,9 +141,18 @@ class StructureData():
             #identify heavy, light and antigen chains 
             heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, tmp_directory, pdb_id=structure_file.stem, verbose=False)
             antibody_chains = heavy_chain + light_chain
-            
+
+            if not antibody_chains and not antigen_chains:
+                print(f"For structure file {structure_file.name} a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains was not found.")
+                failed_files.append((structure_file.name, "Light/heavy chain or antigen chain not detected"))
+                continue
             #extract interface encoding
             epitope_data, paratope_data = get_abag_interaction_data(antigen_chains, antibody_chains, return_bio_pdb_aas=False, atom_radius=atom_radius)
+            if not antibody_chains and not antigen_chains:
+                print(f"For structure file {structure_file.name} no interface was detected {atom_radius}")
+                failed_files.append((structure_file.name, "AbAb Interface not detected {atom_radius} Å"))
+                continue
+
             epitope_enc = [esmif1_enc[enc_idx_lookup[e[1]]][e[2]] for e in epitope_data]
             paratope_enc = [esmif1_enc[enc_idx_lookup[p[1]]][p[2]] for p in paratope_data]
 
@@ -148,9 +164,11 @@ class StructureData():
         
             esmif1_enc_files.append(esmif1_enc_file)
             esmif1_interface_encs.append(interface_enc_avg)
+            success_files.append(structure_file)
             print("Extracting interface antibody-antigen inteface encoding... DONE")
 
-        self.structure_files = structure_files
+        self.structure_files = success_files
+        self.failed_files = failed_files
         self.esmif1_enc_files = esmif1_enc_files
         self.esmif1_interface_encs = esmif1_interface_encs
         self.epitope_datas = epitope_datas
@@ -185,6 +203,12 @@ class EvalAbAgs():
         epitope_datas = self.structuredata.epitope_datas
         paratope_datas = self.structuredata.paratope_datas
         self.create_csvfile(structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath)
+        faildata = self.structuredata.failed_files
+        if faildata:
+            failfile_content = "FileName,Reason\n"
+            failfile_content += "\n".join([f"{d[0]},{d[1]}" for d in faildata])
+            with open(outpath / "failed_inputs.txt", "w") as outfile: outfile.write(failfile_content) 
+        
         print("Creating output files... DONE")
 
         
