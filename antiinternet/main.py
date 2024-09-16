@@ -105,7 +105,7 @@ class StructureData():
             print(f"Structure(s) input did not exist. Not a file or a directory. Exiting!")
             return
          
-        esmif1_enc_files, esmif1_interface_encs = [], []
+        esmif1_enc_files, esmif1_interface_encs, abag_sequence_data = [], [], []
         epitope_datas, paratope_datas = [], []
         success_files, failed_files = [], [] 
 
@@ -129,6 +129,7 @@ class StructureData():
             print(f"Encoding structure from file: {structure_file.name}... DONE")
 
             esmif1_enc = esmif1_enc_data["encs"]
+            esmif1_seqs = esmif1_enc_data["seqs"]
             if esmif1_enc == None:
                 print(f"Structure file {structure_file.name} was not detected as pdb or cif file. No score will be computed for it.")
                 failed_files.append((structure_file.name, "Not a PDB/CIF"))
@@ -153,9 +154,15 @@ class StructureData():
                 failed_files.append((structure_file.name, "AbAb Interface not detected {atom_radius} Å"))
                 continue
 
+            # extra check (shouldn't happen)
+            epipara_data = epitope_data + paratope_data
+            check = all([True if esmif1_seqs[enc_idx_lookup[d[1]]][d[2]] == d[0] else False for d in epipara_data ])
+            if not check: 
+                print("ESMIF1 encoding and PDB read mismatch")
+
+
             epitope_enc = [esmif1_enc[enc_idx_lookup[e[1]]][e[2]] for e in epitope_data]
             paratope_enc = [esmif1_enc[enc_idx_lookup[p[1]]][p[2]] for p in paratope_data]
-
             interface_enc = torch.stack(epitope_enc + paratope_enc)
             interface_enc_avg = torch.mean(interface_enc, axis=0)
 
@@ -164,6 +171,7 @@ class StructureData():
         
             esmif1_enc_files.append(esmif1_enc_file)
             esmif1_interface_encs.append(interface_enc_avg)
+            abag_sequence_data.append( (f"{structure_file.name}_{''.join(esmif1_enc_data['chain_ids'])}", ":".join(esmif1_seqs) ) )
             success_files.append(structure_file)
             print("Extracting interface antibody-antigen inteface encoding... DONE")
 
@@ -173,6 +181,7 @@ class StructureData():
         self.esmif1_interface_encs = esmif1_interface_encs
         self.epitope_datas = epitope_datas
         self.paratope_datas = paratope_datas
+        self.abag_sequence_data = abag_sequence_data
             
 
 class EvalAbAgs():
@@ -202,12 +211,18 @@ class EvalAbAgs():
         structure_files = self.structuredata.structure_files
         epitope_datas = self.structuredata.epitope_datas
         paratope_datas = self.structuredata.paratope_datas
+        
+        # write main output files (.csv with scores and .csv abag interface annotation)
         self.create_csvfile(structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath)
+        
+        # write sequence data as fasta file
+        abag_sequence_data  = self.structuredata.abag_sequence_data
+        self.write_sequence_data(abag_sequence_data, outpath / "abag_sequence_data.fasta")
+
+        # write fail files
         faildata = self.structuredata.failed_files
-        if faildata:
-            failfile_content = "FileName,Reason\n"
-            failfile_content += "\n".join([f"{d[0]},{d[1]}" for d in faildata])
-            with open(outpath / "failed_inputs.txt", "w") as outfile: outfile.write(failfile_content) 
+        if faildata: self.write_failed_files(faildata, outpath / "failed_files.txt")
+            
         
         print("Creating output files... DONE")
 
@@ -302,4 +317,13 @@ class EvalAbAgs():
         if not outpath.is_dir(): outpath.mkdir(parents=True)
         with open(outpath / "output.csv", "w") as outfile: outfile.write(score_csv_content)
         with open(outpath / "interface.csv", "w") as outfile: outfile.write(interface_csv_content)
-        
+    
+    def write_failed_files(self, faildata, out_filepath):
+        failfile_content = "FileName,Reason\n"
+        failfile_content += "\n".join([f"{d[0]},{d[1]}" for d in faildata])
+        with open(out_filepath, "w") as outfile: outfile.write(failfile_content) 
+
+    def write_sequence_data(self, sequence_data, out_filepath):
+        N = len(sequence_data)
+        fastafile_content = "\n".join([f">{sequence_data[i][0]}\n{sequence_data[i][1]}" for i in range(N)])
+        with open(out_filepath, "w") as outfile: outfile.write(fastafile_content)

@@ -44,7 +44,7 @@ class ESMIF1Model():
 
         esmif1_encs, sequence_order, chain_ids = self.compute_esmif1_on_pdb(pdb_file)        
         #save esm-if1 encoding
-        esmif1_enc_data = {"encs": esmif1_encs, "chain_ids": chain_ids}
+        esmif1_enc_data = {"encs": esmif1_encs, "chain_ids": chain_ids, "seqs": sequence_order}
 
         return esmif1_enc_data 
 
