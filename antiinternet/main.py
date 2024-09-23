@@ -103,7 +103,7 @@ class StructureData():
 
         else:
             print(f"Structure(s) input did not exist. Not a file or a directory. Exiting!")
-            return
+            return 
          
         esmif1_enc_files, esmif1_interface_encs, abag_sequence_data = [], [], []
         epitope_datas, paratope_datas = [], []
@@ -188,7 +188,7 @@ class EvalAbAgs():
 
     def __init__(self,
                  structuredata,
-                 device = None):
+                 device = None, decimal_precision=None):
         """
         Inputs and initialization:
             structuredata: Structure class object
@@ -201,6 +201,7 @@ class EvalAbAgs():
             self.device = device
 
         self.structuredata = structuredata
+        self.decimal_precision= decimal_precision
 
     def predict(self, outpath):
 
@@ -280,7 +281,7 @@ class EvalAbAgs():
             with torch.no_grad():
                 model.load_state_dict(torch.load(model_state, map_location=self.device))
                 model = model.to(self.device)
-                model.eval()
+                model.eval()    
                 model_output = model(interface_encs)
                 model_probs = softmax_function(model_output)[:, 1].detach().cpu()
                 model_outputs[i] = model_probs 
@@ -300,7 +301,10 @@ class EvalAbAgs():
 
         for score in scores:
             structure_file, antiinternet_score, antiscout_score = score
-            antiinternet_score, antiscout_score = str(antiinternet_score.item()), str(antiscout_score.item())
+
+            if self.decimal_precision != None: antiinternet_score, antiscout_score = str(round(antiinternet_score.item(), self.decimal_precision)), str(round(antiscout_score.item(), self.decimal_precision) )
+            else: antiinternet_score, antiscout_score = str(antiinternet_score.item()), str(antiscout_score.item())
+            
             score_csv_content.append(f"{structure_file.name},{antiinternet_score},{antiscout_score}")
 
 
