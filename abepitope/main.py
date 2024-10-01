@@ -21,8 +21,8 @@ from utilities import load_pickle_file
 ### STATIC PATHS ###
 ROOT_DIRECTORY = Path( Path(__file__).parent.resolve() )
 MODELS_DIRECTORY = ROOT_DIRECTORY / "models"
-ANTIINTERNET_MODELS = MODELS_DIRECTORY / "antiinternet1.0"
-ANTISCOUT_MODELS = MODELS_DIRECTORY / "antiscout1.0"
+ABEPISCORE_MODELS = MODELS_DIRECTORY / "abepiscore1.0"
+ABEPITARGET_MODELS = MODELS_DIRECTORY / "abepitarget1.0"
 AB_IDENTIFY_HMM_MODELS = MODELS_DIRECTORY / "hmm_antibody_identification"
 
 ### SET GPU OR CPU ###
@@ -38,7 +38,7 @@ else:
 
 class DenseNet(nn.Module):
     """
-    DenseNet used for finetuning ESM-IF1 to AntiInterNet-1.0 and AntiScout-1.0
+    DenseNet used for finetuning ESM-IF1 to AbEpiScore-1.0 and AbEpiTarget-1.0
     Expect input of dimension: (batch_size, embedding size)
     """
     def __init__(self,
@@ -205,8 +205,8 @@ class EvalAbAgs():
 
     def predict(self, outpath):
 
-        antiinternet_scores, _ = self.antiinternet()
-        antiscout_scores, _ = self.antiscout()
+        abepiscore_scores, _ = self.abepiscore()
+        abepitarget_scores, _ = self.abepitarget()
 
         print("Creating output files...")
         structure_files = self.structuredata.structure_files
@@ -214,7 +214,7 @@ class EvalAbAgs():
         paratope_datas = self.structuredata.paratope_datas
         
         # write main output files (.csv with scores and .csv abag interface annotation)
-        self.create_csvfile(structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath)
+        self.create_csvfile(structure_files, abepiscore_scores, abepitarget_scores, epitope_datas, paratope_datas, outpath)
         
         # write sequence data as fasta file
         abag_sequence_data  = self.structuredata.abag_sequence_data
@@ -228,14 +228,14 @@ class EvalAbAgs():
         print("Creating output files... DONE")
 
         
-    def antiinternet(self):
+    def abepiscore(self):
         """
       
         """
         
-        print("Running AntiInterNet")
+        print("Running AbEpiScore-1.0")
         model = DenseNet().to(device)
-        modelstates = list(ANTIINTERNET_MODELS.glob("*"))
+        modelstates = list(ABEPISCORE_MODELS.glob("*"))
         nr_models = len(modelstates)
         interface_encs = self.structuredata.esmif1_interface_encs
         structure_files = self.structuredata.structure_files
@@ -254,19 +254,19 @@ class EvalAbAgs():
                 model_outputs[i] = torch.flatten(model_output).detach().cpu()
 
         avg_model_outputs = torch.mean(model_outputs, axis=0)
-        print("Running AntiInterNet-1.0... DONE")
+        print("Running AbEpiScore-1.0... DONE")
         
         return avg_model_outputs, structure_files
 
 
-    def antiscout(self):
+    def abepitarget(self):
         """
       
         """
 
-        print("Running AntiScout-1.0...")
+        print("Running AbEpiTarget-1.0...")
         model = DenseNet(fc1_size=450, fc2_size=250, fc3_size=50, num_classes=2).to(device)
-        modelstates = list(ANTISCOUT_MODELS.glob("*"))
+        modelstates = list(ABEPITARGET_MODELS.glob("*"))
         softmax_function = nn.Softmax(dim=1).to(device)          
 
         nr_models = len(modelstates)
@@ -288,24 +288,24 @@ class EvalAbAgs():
                 
                 
         avg_model_outputs = torch.mean(model_outputs, axis=0)
-        print("Running AntiScout-1.0... DONE")
+        print("Running AbEpiTarget-1.0... DONE")
 
         return avg_model_outputs, structure_files
 
-    def create_csvfile(self, structure_files, antiinternet_scores, antiscout_scores, epitope_datas, paratope_datas, outpath):
+    def create_csvfile(self, structure_files, abepiscore_scores, abepitarget_scores, epitope_datas, paratope_datas, outpath):
 
         #create .csv content
-        scores = list( zip(structure_files, antiinternet_scores, antiscout_scores)) 
+        scores = list( zip(structure_files, abepiscore_scores, abepitarget_scores)) 
         interfaces = list( zip(structure_files, epitope_datas, paratope_datas) )
-        score_csv_content, interface_csv_content = ["FileName,AntiInterNet-1.0,AntiScout-1.0"], ["FileName,EpitopeResidue,ParatopeResidue"]
+        score_csv_content, interface_csv_content = ["FileName,AbEpiScore-1.0,AbEpiTarget-1.0"], ["FileName,EpitopeResidue,ParatopeResidue"]
 
         for score in scores:
-            structure_file, antiinternet_score, antiscout_score = score
+            structure_file, abepiscore_score, abepitarget_score = score
 
-            if self.decimal_precision != None: antiinternet_score, antiscout_score = str(round(antiinternet_score.item(), self.decimal_precision)), str(round(antiscout_score.item(), self.decimal_precision) )
-            else: antiinternet_score, antiscout_score = str(antiinternet_score.item()), str(antiscout_score.item())
+            if self.decimal_precision != None: abepiscore_score, abepitarget_score = str(round(abepiscore_score.item(), self.decimal_precision)), str(round(abepitarget_score.item(), self.decimal_precision) )
+            else: abepiscore_score, abepitarget_score = str(abepiscore_score.item()), str(abepitarget_score.item())
             
-            score_csv_content.append(f"{structure_file.name},{antiinternet_score},{antiscout_score}")
+            score_csv_content.append(f"{structure_file.name},{abepiscore_score},{abepitarget_score}")
 
 
         for interface in interfaces:
