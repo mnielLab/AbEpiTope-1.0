@@ -3,9 +3,9 @@
 # Copyright (C) 2020 Howard Hughes Medical Institute.
 # Freely distributed under the BSD open source license.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# query HMM file:                  /home/projects/vaccine/people/joacli/AntiInterNet-1.0/antiinternet/models/hmm_antibody_identification/kappa.hmm
-# target sequence database:        /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/chain_seq_tmp.fasta
-# output directed to file:         /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/kappa_chains
+# query HMM file:                  /home/projects/vaccine/people/joacli/AbEpiTope-1.0/abepitope/models/hmm_antibody_identification/kappa.hmm
+# target sequence database:        /home/projects/vaccine/people/joacli/AbEpiTope-1.0/temporary/chain_seq_tmp.fasta
+# output directed to file:         /home/projects/vaccine/people/joacli/AbEpiTope-1.0/temporary/kappa_chains
 # show alignments in output:       no
 # sequence reporting threshold:    E-value <= 1e-18
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14,31 +14,28 @@ Query:       kappa  [M=144]
 Description: Kappa Light chain|K|K1:26-32;K2:50-52;K3:91-96
 Scores for complete sequences (score includes all domains):
    --- full sequence ---   --- best 1 domain ---    -#dom-
-    E-value  score  bias    E-value  score  bias    exp  N  Sequence           Description
-    ------- ------ -----    ------- ------ -----   ---- --  --------           -----------
-    1.4e-58  183.9   2.6    1.5e-36  111.1   0.0    2.2  2  4ye4_ag_G_ab_L_H_L  
+    E-value  score  bias    E-value  score  bias    exp  N  Sequence Description
+    ------- ------ -----    ------- ------ -----   ---- --  -------- -----------
+
+   [No hits detected that satisfy reporting thresholds]
 
 
 Domain annotation for each sequence:
->> 4ye4_ag_G_ab_L_H_L  
-   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
- ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
-   1 !  111.1   0.0   1.5e-36   1.5e-36       2      81 ..       1      68 [.       1      68 [. 0.99
-   2 !   72.6   0.8   7.2e-25   7.2e-25      85     144 .]      73     116 ..      71     116 .. 0.96
 
+   [No targets detected that satisfy reporting thresholds]
 
 
 Internal pipeline statistics summary:
 -------------------------------------
 Query model(s):                            1  (144 nodes)
-Target sequences:                          1  (217 residues searched)
+Target sequences:                          1  (214 residues searched)
 Passed MSV filter:                         1  (1); expected 0.0 (0.02)
-Passed bias filter:                        1  (1); expected 0.0 (0.02)
-Passed Vit filter:                         1  (1); expected 0.0 (0.001)
-Passed Fwd filter:                         1  (1); expected 0.0 (1e-05)
+Passed bias filter:                        0  (0); expected 0.0 (0.02)
+Passed Vit filter:                         0  (0); expected 0.0 (0.001)
+Passed Fwd filter:                         0  (0); expected 0.0 (1e-05)
 Initial search space (Z):                  1  [actual number of targets]
-Domain search space  (domZ):               1  [number of targets reported over threshold]
+Domain search space  (domZ):               0  [number of targets reported over threshold]
 # CPU time: 0.00u 0.00s 00:00:00.00 Elapsed: 00:00:00.00
-# Mc/sec: 21.93
+# Mc/sec: 37.05
 //
 [ok]

@@ -1,9 +1,8 @@
-# AntiInterNet-1.0 and AntiScout-1.0
-The tools, AntInterNet-1.0 and AntiScout-1.0 are computational tools for antibody-specific B-cell epitope prediction, using the pretrained inverse folding model, ESM-IF1.   
-They are designed to assess the accuracy of modelled antibody-antigen interfaces (PDB/CIF of AlphaFold or experimentally solved structures) and to select the most likely antibody to bind a given antigen from a pool of candidates, respectively. 
+# AbEpiTope-1.0
+AbEpiTope-1.0 features is a computational tool that features two scores: AbEpiScore-1.0, designed for assessing the accuracy of modelled AbAg interfaces, and AbEpiTarget-1.0, optimised for selecting the antibody most likely to bind a given antigen. Both use the pretrained inverse folding model, ESM-IF1. As input, both models expect modelled antibody-antigen interfaces (PDB/CIF of AlphaFold or experimentally solved structures).
 
 ## License
-AntiInterNet-1.0 and AntiScout-1.0 are developed by the Health Tech section at Technical University of Denmark (DTU). The code and data can be used freely by academic groups for non-commercial purposes. If you plan to use these tools for any for-profit application, you are required to obtain a separate license (contact Morten Nielsen, morni@dtu.dk).
+AbEpiTope-1.0 was developed by the Health Tech section at Technical University of Denmark (DTU). The code and data can be used freely by academic groups for non-commercial purposes. If you plan to use these tools for any for-profit application, you are required to obtain a separate license (contact Morten Nielsen, morni@dtu.dk).
 
 ## Installation 
 It is important that you follow the steps and do not install a latest pytorch and cudatoolkit version. 

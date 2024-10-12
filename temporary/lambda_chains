@@ -3,9 +3,9 @@
 # Copyright (C) 2020 Howard Hughes Medical Institute.
 # Freely distributed under the BSD open source license.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# query HMM file:                  /home/projects/vaccine/people/joacli/AntiInterNet-1.0/antiinternet/models/hmm_antibody_identification/lambda.hmm
-# target sequence database:        /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/chain_seq_tmp.fasta
-# output directed to file:         /home/projects/vaccine/people/joacli/AntiInterNet-1.0/temporary/lambda_chains
+# query HMM file:                  /home/projects/vaccine/people/joacli/AbEpiTope-1.0/abepitope/models/hmm_antibody_identification/lambda.hmm
+# target sequence database:        /home/projects/vaccine/people/joacli/AbEpiTope-1.0/temporary/chain_seq_tmp.fasta
+# output directed to file:         /home/projects/vaccine/people/joacli/AbEpiTope-1.0/temporary/lambda_chains
 # show alignments in output:       no
 # sequence reporting threshold:    E-value <= 1e-18
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -28,14 +28,14 @@ Domain annotation for each sequence:
 Internal pipeline statistics summary:
 -------------------------------------
 Query model(s):                            1  (144 nodes)
-Target sequences:                          1  (217 residues searched)
+Target sequences:                          1  (214 residues searched)
 Passed MSV filter:                         1  (1); expected 0.0 (0.02)
-Passed bias filter:                        1  (1); expected 0.0 (0.02)
-Passed Vit filter:                         1  (1); expected 0.0 (0.001)
-Passed Fwd filter:                         1  (1); expected 0.0 (1e-05)
+Passed bias filter:                        0  (0); expected 0.0 (0.02)
+Passed Vit filter:                         0  (0); expected 0.0 (0.001)
+Passed Fwd filter:                         0  (0); expected 0.0 (1e-05)
 Initial search space (Z):                  1  [actual number of targets]
 Domain search space  (domZ):               0  [number of targets reported over threshold]
 # CPU time: 0.00u 0.00s 00:00:00.00 Elapsed: 00:00:00.00
-# Mc/sec: 24.32
+# Mc/sec: 34.38
 //
 [ok]
