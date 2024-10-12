@@ -1,3 +1,0 @@
-FileName,Reason
-dingdong.pdb,Not a PDB/CIF
-dingdong2.cif,Not a PDB/CIF
