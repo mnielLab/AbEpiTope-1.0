@@ -18,6 +18,7 @@ $ conda install pip
 ```
 ### Install Pip Packages 
 ```
+First, download requirements.txt file. Then,
 $ pip install -r requirements.txt #install package dependencies
-$ pip install git+ssh://git@github.com/mnielLab/AntiInterNet-1.0.git #install source code directly with pip
+$ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
 ```
