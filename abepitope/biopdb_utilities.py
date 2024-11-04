@@ -220,7 +220,7 @@ def atom_neighbourhead_search_return_res(search_object, search_atoms, atom_radiu
     paired_interacting_residues = list()
 
     for search_atom in search_atoms:
-        interact_res = search_object.search(search_atom.coord, radius = 4, level="R")
+        interact_res = search_object.search(search_atom.coord, radius = atom_radius, level="R")
 
         if interact_res:
             search_residue = search_atom.get_parent()

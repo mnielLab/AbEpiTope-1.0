@@ -143,15 +143,16 @@ class StructureData():
             heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, tmp_directory, pdb_id=structure_file.stem, verbose=False)
             antibody_chains = heavy_chain + light_chain
 
-            if not antibody_chains and not antigen_chains:
+            if not antibody_chains or not antigen_chains:
                 print(f"For structure file {structure_file.name} a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains was not found.")
                 failed_files.append((structure_file.name, "Light/heavy chain or antigen chain not detected"))
                 continue
             #extract interface encoding
             epitope_data, paratope_data = get_abag_interaction_data(antigen_chains, antibody_chains, return_bio_pdb_aas=False, atom_radius=atom_radius)
-            if not antibody_chains and not antigen_chains:
-                print(f"For structure file {structure_file.name} no interface was detected {atom_radius}")
-                failed_files.append((structure_file.name, "AbAb Interface not detected {atom_radius} Å"))
+            
+            if not epitope_data or not paratope_data:
+                print(f"For structure file {structure_file.name} no interface was detected at {atom_radius} Å")
+                failed_files.append((structure_file.name, f"AbAb Interface not detected {atom_radius} Å"))
                 continue
 
             # extra check (shouldn't happen)
@@ -203,6 +204,9 @@ class EvalAbAgs():
         self.structuredata = structuredata
         self.decimal_precision= decimal_precision
 
+        if not structuredata.esmif1_interface_encs:
+            print("No antibody-antigen interface encoded data was detected. Running 'predict' will therefore not produce any scores.")
+            
     def predict(self, outpath):
 
         abepiscore_scores, _ = self.abepiscore()
@@ -241,17 +245,18 @@ class EvalAbAgs():
         structure_files = self.structuredata.structure_files
         
         nr_structures = len(interface_encs)
-        
-        model_outputs = []
         model_outputs = torch.zeros((nr_models, nr_structures))
-        for i in range(nr_models):
-            model_state = modelstates[i]
-            with torch.no_grad():
-                model.load_state_dict(torch.load(model_state, map_location=self.device))
-                model = model.to(self.device)
-                model.eval()
-                model_output = model(interface_encs)
-                model_outputs[i] = torch.flatten(model_output).detach().cpu()
+        
+        if nr_structures != 0:
+
+            for i in range(nr_models):
+                model_state = modelstates[i]
+                with torch.no_grad():
+                    model.load_state_dict(torch.load(model_state, map_location=self.device))
+                    model = model.to(self.device)
+                    model.eval()
+                    model_output = model(interface_encs)
+                    model_outputs[i] = torch.flatten(model_output).detach().cpu()
 
         avg_model_outputs = torch.mean(model_outputs, axis=0)
         print("Running AbEpiScore-1.0... DONE")
@@ -273,19 +278,21 @@ class EvalAbAgs():
         interface_encs = self.structuredata.esmif1_interface_encs
         structure_files = self.structuredata.structure_files
         nr_structures = len(interface_encs)
-        
-        model_outputs = []
+    
         model_outputs = torch.zeros((nr_models, nr_structures))
-        for i in range(nr_models):
-            model_state = modelstates[i]
-            with torch.no_grad():
-                model.load_state_dict(torch.load(model_state, map_location=self.device))
-                model = model.to(self.device)
-                model.eval()    
-                model_output = model(interface_encs)
-                model_probs = softmax_function(model_output)[:, 1].detach().cpu()
-                model_outputs[i] = model_probs 
-                
+
+        if nr_structures != 0:
+
+            for i in range(nr_models):
+                model_state = modelstates[i]
+                with torch.no_grad():
+                    model.load_state_dict(torch.load(model_state, map_location=self.device))
+                    model = model.to(self.device)
+                    model.eval()    
+                    model_output = model(interface_encs)
+                    model_probs = softmax_function(model_output)[:, 1].detach().cpu()
+                    model_outputs[i] = model_probs 
+                    
                 
         avg_model_outputs = torch.mean(model_outputs, axis=0)
         print("Running AbEpiTarget-1.0... DONE")
