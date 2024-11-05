@@ -1,6 +1,6 @@
 from abepitope.main import StructureData, EvalAbAgs
 from pathlib import Path
-PDBDIR = Path.cwd() / "abag_exampledata" / "test"
+PDBDIR = Path.cwd() / "abag_exampledata" / "Cancer"
 ENCDIR = Path.cwd() / "encodings"
 TMPDIR = Path.cwd() / "temporary"
 OUTDIR = Path.cwd() / "output"

@@ -7,7 +7,7 @@ MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
 AA3to1_DICT = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I', 'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S', 'THR': 'T', 'VAL': 'V', 'TRP': 'W', 'TYR': 'Y'}
 
-def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", hmm_eval=float(1e-18), verbose=True):
+def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", hmm_eval=float(1e-18), verbose=True, abseq_type_lookup=None):
     
     #make temporay result path, if it doesn't exist
     if not tmp.is_dir(): tmp.mkdir(parents=True)
@@ -26,13 +26,31 @@ def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", h
         print("Could not recognize {abag_path} as a pdb or cif file")
         return [], [], []
 
+    # try identfying without HMM identification (for speed up)
+    if abseq_type_lookup is not None:
+        seqs_in_lookup = abseq_type_lookup.keys()
+        for chain in model:
+            aa_seq = write_biopdb_chain_residues_to_fasta(chain, pdb_id)[0]
+
+            if aa_seq in seqs_in_lookup: ab_type = abseq_type_lookup[aa_seq]
+            else: ab_type = "U"
+
+            # heavy or light chain
+            if ab_type == "H": heavy_chain.append(chain)
+            elif ab_type == "L": light_chain.append(chain)
+            # antigen or not antibody chain lookup
+            else: antigen_chains.append(chain)
+
+    # if heavy and light chain identified, return and skip HMM identification
+    if heavy_chain and light_chain: return heavy_chain, light_chain, antigen_chains
+    else: antigen_chains = [] 
 
     for chain in model:
 
         #create a temporary fasta file for chain
         write_biopdb_chain_residues_to_fasta(chain, pdb_id, tgt_file = tmp / "chain_seq_tmp.fasta")
-        #identify if it is a heavy / light chain or not.
-        #do heavy and kappa HMM profile matching
+        
+        #identify if it is a heavy / light chain or not
         subprocess.run(["hmmsearch", "--noali", "-E", str(hmm_eval), "-o", tmp / "heavy_chains", heavy_hmm , tmp / "chain_seq_tmp.fasta"])
         subprocess.run(["hmmsearch", "--noali", "-E", str(hmm_eval), "-o", tmp / "lambda_chains", light_lambda_hmm, tmp / "chain_seq_tmp.fasta"])
         subprocess.run(["hmmsearch", "--noali", "-E", str(hmm_eval), "-o", tmp / "kappa_chains", light_kappa_hmm, tmp / "chain_seq_tmp.fasta"])
@@ -141,12 +159,9 @@ def read_cif_structure(cif_file, pdb_id="foo", modelnr=0, return_all_models=Fals
 
 def write_biopdb_chain_residues_to_fasta(chains, pdb_acc_name, tgt_file=None):
     """
-    Inputs: residues: List of Bio PDB residue class objects.
+    Inputs: chains: List of Bio PDB chain class objects.
             epitope_or_paratope_res: List of Bio PDB residue class objects
-    Outputs: annotated_AA_seq: String of amino acid characters where,
-                               capitalized letter = Epitope/Paratope residue
-                               non-capitalized letter = Non-epitope/Non-paratopee residue.
-                               x/X are non amino acid characters, such as DNA or RNA.
+    Outputs: AA_seqs. Amino acid sequences of chains.
     """
     #sometimes chains are passed as just one chain not in a list
     if not isinstance(chains, list): chains = [chains]

@@ -8,6 +8,7 @@ import torch.nn as nn
 import csv
 from pathlib import Path
 import sys
+from datetime import datetime
 import pdb
 import pickle
 from pathlib import Path
@@ -106,6 +107,7 @@ class StructureData():
             return 
          
         esmif1_enc_files, esmif1_interface_encs, abag_sequence_data = [], [], []
+        abseq_type_lookup = {}
         epitope_datas, paratope_datas = [], []
         success_files, failed_files = [], [] 
 
@@ -116,6 +118,7 @@ class StructureData():
         print("Loading ESM-IF1 model...")
         esmif1_util = ESMIF1Model(esmif1_modelpath=esmif1_modelpath)
         print("Loading ESM-IF1 model... DONE")
+
     
         for structure_file in structure_files:
 
@@ -137,17 +140,27 @@ class StructureData():
 
             nr_seqs = len(esmif1_enc)
             enc_idx_lookup = {esmif1_enc_data["chain_ids"][i]:i for i in range(nr_seqs)}
-            
-            print("Extracting interface antibody-antigen inteface encoding... ")
-            #identify heavy, light and antigen chains 
-            heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, tmp_directory, pdb_id=structure_file.stem, verbose=False)
+
+            # identify heavy, light and antigen chains
+            print("Extracting interface antibody-antigen inteface encoding...")
+            unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            structure_tmp_directory = tmp_directory / f"{structure_file.stem}_{unique_timestamp}"
+            heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, structure_tmp_directory, pdb_id=structure_file.stem, verbose=False, abseq_type_lookup=abseq_type_lookup)
             antibody_chains = heavy_chain + light_chain
+
+            # add sequences to lookup
+            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[heavy_chain[0].get_id()]] ] = "H"
+            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[light_chain[0].get_id()]] ] = "L"
+            
+            # remove temporary dir + files
+            for f in structure_tmp_directory.glob("*"): f.unlink()
+            structure_tmp_directory.rmdir()            
 
             if not antibody_chains or not antigen_chains:
                 print(f"For structure file {structure_file.name} a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains was not found.")
                 failed_files.append((structure_file.name, "Light/heavy chain or antigen chain not detected"))
                 continue
-            #extract interface encoding
+            # extract interface encoding
             epitope_data, paratope_data = get_abag_interaction_data(antigen_chains, antibody_chains, return_bio_pdb_aas=False, atom_radius=atom_radius)
             
             if not epitope_data or not paratope_data:
@@ -160,7 +173,6 @@ class StructureData():
             check = all([True if esmif1_seqs[enc_idx_lookup[d[1]]][d[2]] == d[0] else False for d in epipara_data ])
             if not check: 
                 print("ESMIF1 encoding and PDB read mismatch")
-
 
             epitope_enc = [esmif1_enc[enc_idx_lookup[e[1]]][e[2]] for e in epitope_data]
             paratope_enc = [esmif1_enc[enc_idx_lookup[p[1]]][p[2]] for p in paratope_data]
