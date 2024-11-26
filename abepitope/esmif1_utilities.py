@@ -77,8 +77,6 @@ class ESMIF1Model():
 
         return esmif1_encs, sequence_order, chain_names
 
-
-
     def esmif1encs_forwardpass(self, model, alphabet, coords, c, seq):
 
         with torch.no_grad():

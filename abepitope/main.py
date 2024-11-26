@@ -147,10 +147,9 @@ class StructureData():
             structure_tmp_directory = tmp_directory / f"{structure_file.stem}_{unique_timestamp}"
             heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, structure_tmp_directory, pdb_id=structure_file.stem, verbose=False, abseq_type_lookup=abseq_type_lookup)
             antibody_chains = heavy_chain + light_chain
-
             # add sequences to lookup
-            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[heavy_chain[0].get_id()]] ] = "H"
-            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[light_chain[0].get_id()]] ] = "L"
+            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[antibody_chains[0].get_id()]] ] = "H"
+            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[antibody_chains[1].get_id()]] ] = "L"
             
             # remove temporary dir + files
             for f in structure_tmp_directory.glob("*"): f.unlink()
