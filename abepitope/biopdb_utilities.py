@@ -1,8 +1,7 @@
-from Bio.PDB import PDBParser, MMCIFParser, NeighborSearch, Selection, Polypeptide
+from Bio.PDB import PDBParser, MMCIFParser, NeighborSearch, Selection
 import subprocess
 from pathlib import Path
 import sys
-import pdb
 MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
 AA3to1_DICT = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I', 'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S', 'THR': 'T', 'VAL': 'V', 'TRP': 'W', 'TYR': 'Y'}
@@ -19,8 +18,8 @@ def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", h
     
     heavy_chain, light_chain, antigen_chains = [], [], [] 
 
-    if is_pdb_file_biopython(abag_path): model = read_pdb_structure(abag_path)
-    elif is_cif_file_biopython(abag_path): model = read_cif_structure(abag_path)
+    if is_pdb_file(abag_path): model = read_pdb_structure(abag_path)
+    elif is_cif_file(abag_path): model = read_cif_structure(abag_path)
 
     else:
         print("Could not recognize {abag_path} as a pdb or cif file")
@@ -98,22 +97,35 @@ def identify_abag_with_hmm(abag_path, hmm_models_directory, tmp, pdb_id="foo", h
 
     return heavy_chain, light_chain, antigen_chains
 
-def is_pdb_file_biopython(file_path):
-    parser = PDBParser(QUIET=True)
-    try:
-        structure = parser.get_structure('pdb_structure', file_path)
-        return True  # If no exception is raised, it's a valid PDB file
-    except Exception as e:
-        return False
+def is_pdb_file(file_path):
+    """
+    File extension needs to be pdb/PDB, as well as readable by PDB parser.
+    """
 
-
-def is_cif_file_biopython(file_path):
-    parser = MMCIFParser(QUIET=True)
+    # check file ending first
+    if Path(file_path).suffix != '.pdb': return False
+    # check if can be parsed as pdb, if no exception is raised, likely valid pdb file
     try:
+        parser = PDBParser(QUIET=True)  
         structure = parser.get_structure('pdb_structure', file_path)
-        return True  # If no exception is raised, it's a valid PDB file
-    except Exception as e:
-        return False
+        return True  
+    except Exception: return False
+  
+def is_cif_file(file_path):
+    """
+    File extension needs to be cif/CIF, as well as readable by CIF parser.
+    """
+
+    # check file ending first
+    if Path(file_path).suffix != '.cif': return False
+    # check if can be parsed as cif, if no exception is raised, likely valid cif file
+    try:
+        parser = MMCIFParser(QUIET=True)
+        structure = parser.get_structure('cif_structure', file_path)
+        return True
+
+    except Exception: return False
+
 
 def read_pdb_structure(pdb_file, pdb_id="foo", modelnr=0, return_all_models = False):
         """

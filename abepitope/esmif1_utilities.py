@@ -1,10 +1,8 @@
-from biopdb_utilities import read_pdb_structure, is_pdb_file_biopython, is_cif_file_biopython, read_cif_structure
+from biopdb_utilities import read_pdb_structure, is_pdb_file, is_cif_file, read_cif_structure
 import esm
 import torch
 from pathlib import Path
 import sys
-import time
-
 MODULE_DIR = str( Path( Path(__file__).parent.resolve() ) )
 sys.path.append(MODULE_DIR)
 
@@ -52,8 +50,8 @@ class ESMIF1Model():
     def compute_esmif1_on_pdb(self, pdb_file):
 
 
-        if is_pdb_file_biopython(pdb_file): structure = read_pdb_structure(pdb_file)
-        elif is_cif_file_biopython(pdb_file): structure = read_cif_structure(pdb_file)
+        if is_pdb_file(pdb_file): structure = read_pdb_structure(pdb_file)
+        elif is_cif_file(pdb_file): structure = read_cif_structure(pdb_file)
         else: structure = None
 
         if structure == None:
@@ -101,5 +99,3 @@ class ESMIF1Model():
             enc_out = enc_out[:target_chain_len].cpu().detach()
             
             return enc_out
-
-
