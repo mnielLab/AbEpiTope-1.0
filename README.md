@@ -55,15 +55,12 @@ STRUCTUREINPUTS = Path.cwd() / "abag_exampledata" / "Cancer" # directory contain
 ENCDIR = Path.cwd() / "encodings" # directory for storing ESM-IF1 encodings
 TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files 
 
-## create abag interface encodings ##
 # encode antibody-antigen complex structure files at default 4 Å distance
 data = StructureData()
 data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff)
 # or encode antibody-antigen complex structure files at custom distance, such as 4.5 Å distance
 data = StructureData()
 data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff, atom_radius=4.5)
-
-## evaluate antibody-antigen complexes ## 
 
 # compute AbEpiscore-1.0 scores only
 abepiscore_scores, filepaths = eval_abags.abepiscore()
