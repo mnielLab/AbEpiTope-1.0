@@ -61,10 +61,7 @@ TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files
 
 # create 4Å (default) distance antibody-antigen interface esmif1 encodings of structure files
 data = StructureData()
-data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR))
-# or create 4.5Å distance antibody-antigen interface esmif1 encodings of structure files
-# data = StructureData()
-# data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
+data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR) # use atom_radius for custom Å distance for antibody-antigen, for example interface data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5) 
 
 # compute AbEpiScore-1.0 and AbEpiTarget-1.0 scores for antibody-antigen complex structures at set antibody-antigen Å distance 
 # save results output files (see 'Outputs')
