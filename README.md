@@ -57,10 +57,10 @@ TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files
 
 # encode antibody-antigen complex structure files at default 4 Å distance
 data = StructureData()
-data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff)
+data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR))
 # or encode antibody-antigen complex structure files at custom distance, such as 4.5 Å distance
 data = StructureData()
-data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff, atom_radius=4.5)
+data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
 
 # compute sorted AbEpiscore-1.0 scores + structure filenames in descending order (higher score = better Ab-Ag interface)
 abepiscore_scores, filepaths = eval_abags.abepiscore()
