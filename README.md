@@ -26,6 +26,8 @@ $ pip install -r requirements.txt #install package dependencies
 $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
 ```
 ### Usage 
+We provide an example script (demo.py) and a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
+These predicted structures can found under ./abag_exampledata/Cancer. 
 
 ## Inputs 
 
@@ -33,14 +35,23 @@ AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif).
 1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected. By default, thet distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
+```
+Example code show how antibody-antigen complex strucute files can be encoded using the deafault Å distance.
+$ from abepitope.main import StructureData
+$ data = StructureData()
+$ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff)
+To run with another Å distance, such as 4.5, instead run,
+$ data = StructureData()
+$ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff, atom_radius=4.5)
+```
+
 ## Run
-We provide an example script (demo.py) and a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
-These predicted structures can found under ./abag_exampledata/Cancer. 
 
 After this step, antibody-antigen complex interfaces, can be scored with AbEpiTope-1.0. 
+```
 $ eval_abags = EvalAbAgs(data)
 $ eval_abags.predict(/path/to/output/)
-
+```
 The resulting 
 
 
