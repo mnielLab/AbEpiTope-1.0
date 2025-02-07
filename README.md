@@ -36,14 +36,15 @@ AbEpiTope-1.0 takes structures files of antibody-antigen complexes in **PDB or C
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected at the set Å distance.. By default, this distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
 ## Outputs 
-The tool can output a total four output files. 
+AbEpiTope-1.0 outputs a the following three output files.  
 1. The first, output.csv, is the most useful output file that lists each input structure file along with its AbEpiScore-1.0 and AbEpiTarget-1.0 scores.
    These scores are not sorted.
    * Higher AbEpiscore-1.0 Score = More accurate antibody-antigen interface.
    * Higher AbEpiTarget-1.0 Score = Higher probability that the antibody targets the antigen.   
 2. The second, interface.csv, lists each input structure file along with epitope and paratope residues used to compute these scores **Note:** If a row contains "None" in any column, it indicates that no antibody was identified, or no AbAg interface was detected within the specified Å distance.
 3. The third, abag_sequence_data.fasta, is a fasta formmatted file containing the sequences in each each antibody-antigen complex. The header >FILENAME_CHAINNAMES and the sequences of each abag are joined with ':'.
-4. The fourth, failed_files.csv, is an error file that only appears if an error occurs for one or more of the files in the zip file upload. Each row contains filename and reason for the error.
+
+An additional fourth output file, failed_files.csv, may also be outputted. This an error file that only appears if an error occurs for one or more of input files. Each row contains filename and reason for the error.
 
 ## Example
 We provide a python code snippet hereunder as well as a notebook (demo.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
