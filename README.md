@@ -48,7 +48,7 @@ The tool can output a total four output files.
 4. The fourth, failed_files.csv, is an error file that only appears if an error occurs for one or more of the files in the zip file upload. Each row contains filename and reason for the error.
 
 ## Example
-We provide a python code snippet hereunder as well as a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
+We provide a python code snippet hereunder as well as a notebook (demo.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
 These predicted structures can found under ./abag_exampledata/Cancer. 
 
 ```python
