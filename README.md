@@ -1,5 +1,5 @@
 # AbEpiTope-1.0
-AbEpiTope-1.0 is a computational tool that features two scores: AbEpiScore-1.0, predicting the accuracy of modelled AbAg interfaces, and AbEpiTarget-1.0, for selecting the antibody most likely targeting a given antigen. AbEpiScore-1.0 was trained and evaluated to predict AbAgIoU, measuring the match between predicted epitope and paratope residues and the corresponding ground truth crystal structures, on AlphaFold-2.3 structures made for 1730 antibody-antigen complexes. For each AbAg, 30 structures were made, totalling 51,900 AlphaFold-2.3 structures. AbAgIoU is stronlgy correlated with (DockQ PCC: 0.9392). AbEpiTarget-1.0 was trained and evaluated to identify the true AbAg (featuring the correct antibody and antigen) in 1,730 groups of AbAg complexes also contaning three swapped AbAgs (modelled with the same antigen, but incorrect antibody). 
+AbEpiTope-1.0 is a computational tool that features two scores: AbEpiScore-1.0, predicting the accuracy of modelled AbAg interfaces, and AbEpiTarget-1.0, for selecting the antibody most likely targeting a given antigen. AbEpiScore-1.0 was trained and evaluated to predict AbAgIoU, measuring the match between predicted epitope and paratope residues and the corresponding ground truth crystal structures, on AlphaFold-2.3 structures made for 1730 antibody-antigen complexes. For each AbAg, 30 structures were made, totalling 51,900 AlphaFold-2.3 structures. AbAgIoU is stronlgy correlated with DockQ (PCC: 0.9392). AbEpiTarget-1.0 was trained and evaluated to identify the true AbAg (featuring the correct antibody and antigen) in 1,730 groups of AbAg complexes also contaning three swapped AbAgs (modelled with the same antigen, but incorrect antibody). 
 * **Higher AbEpiScore score = Better antibody-antigen interface.**
 * **Higher AbEpiTarget-1.0 score = Higher probability that the antibody will target the antigen.**
 
@@ -30,11 +30,9 @@ $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source 
 ```
 ### Usage 
 
-
-
 ## Inputs 
-AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif). These structure files can be solved or predicted structures.
-1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
+AbEpiTope-1.0 takes structures files of antibody-antigen complexes in **PDB or CIF format as input**. These structure files can be solved or predicted structures.
+1. The Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected at the set Å distance.. By default, this distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
 ## Outputs 
@@ -60,10 +58,10 @@ STRUCTUREINPUTS = Path.cwd() / "abag_exampledata" / "Cancer" # directory contain
 ENCDIR = Path.cwd() / "encodings" # directory for storing ESM-IF1 encodings
 TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files 
 
-# encode antibody-antigen complex structure files at default 4 Å distance
+# create 4Å (default) distance antibody-antigen interface esmif1 encodings of structure files
 data = StructureData()
 data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR))
-# or encode antibody-antigen complex structure files at custom distance, such as 4.5 Å distance
+# or create 4.5Å distance antibody-antigen interface esmif1 encodings of structure files
 data = StructureData()
 data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
 
