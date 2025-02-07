@@ -1,5 +1,5 @@
 # AbEpiTope-1.0
-AbEpiTope-1.0 is a computational tool that features two scores: AbEpiScore-1.0, predicting the accuracy of modelled AbAg interfaces, and AbEpiTarget-1.0, for selecting the antibody most likely targeting a given antigen. Both use the pretrained inverse folding model, ESM-IF1. As input, both models expect predicted or solved antibody-antigen interfaces in PDB/CIF format. 
+AbEpiTope-1.0 is a computational tool that features two scores: AbEpiScore-1.0, predicting the accuracy of modelled AbAg interfaces, and AbEpiTarget-1.0, for selecting the antibody most likely targeting a given antigen. Both use the pretrained inverse folding model, ESM-IF1. As input, both models expect predicted or solved antibody-antigen interfaces in PDB/CIF format. AbEpiTope-1.0 was trained to evaluate predicted AlphaFold structures, and it will not produce good scoring for structures produced by rigid-body docking.
 
 ## License
 AbEpiTope-1.0 was developed by the Health Tech section at Technical University of Denmark (DTU). The code and data can be used freely by academic groups for non-commercial purposes. If you plan to use these tools for any for-profit application, you are required to obtain a separate license (contact Morten Nielsen, morni@dtu.dk).
@@ -30,8 +30,9 @@ We provide an example script (demo.py) and notebook (demo_notebook.ipynb) for ru
 These predicted structures can found under ./abag_exampledata/Cancer,
 
 ## Input
-AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif). These structure files can be solved or predicted structures. AbEpiTope-1.0 was trained to evaluate predicted AlphaFold structures, and it will not produce good scoring for structures produced by rigid-body docking. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
-The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected.  
+AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif). These structure files can be solved or predicted structures.
+1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
+2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected.  
 
 This code will generate encodings for all antibody-antigen interfaces found downstream in /path/to/structure_file(s)/.
 The full encodings are stored at /path/to/store/encodings/. 
