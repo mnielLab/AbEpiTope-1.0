@@ -32,7 +32,7 @@ $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source 
 
 ### Inputs 
 AbEpiTope-1.0 takes structures files of antibody-antigen complexes in **PDB or CIF format as input**. These structure files can be solved or predicted structures.
-1. The Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
+1. Structure files must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where this is not detected. 
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected at the set Å distance.. By default, this distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
 ### Outputs 
