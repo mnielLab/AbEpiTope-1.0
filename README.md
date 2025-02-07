@@ -28,14 +28,14 @@ First, download requirements.txt file. Then,
 $ pip install -r requirements.txt #install package dependencies
 $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
 ```
-### Usage 
+## Usage 
 
-## Inputs 
+### Inputs 
 AbEpiTope-1.0 takes structures files of antibody-antigen complexes in **PDB or CIF format as input**. These structure files can be solved or predicted structures.
 1. The Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected at the set Å distance.. By default, this distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
-## Outputs 
+### Outputs 
 AbEpiTope-1.0 outputs a the following three output files.  
 1. The first, output.csv, is the most useful output file that lists each input structure file along with its AbEpiScore-1.0 and AbEpiTarget-1.0 scores.
    These scores are not sorted.
@@ -46,7 +46,7 @@ AbEpiTope-1.0 outputs a the following three output files.
 
 An additional fourth output file, failed_files.csv, may also be outputted. This an error file that only appears if an error occurs for one or more of input files. Each row contains filename and reason for the error.
 
-## Example
+### Example
 We provide a python code snippet hereunder as well as a notebook (demo.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
 These predicted structures can found under ./abag_exampledata/Cancer. 
 
