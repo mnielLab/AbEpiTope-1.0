@@ -63,27 +63,13 @@ TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files
 data = StructureData()
 data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR))
 # or create 4.5Å distance antibody-antigen interface esmif1 encodings of structure files
-data = StructureData()
-data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
+# data = StructureData()
+# data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
 
-# compute sorted AbEpiscore-1.0 scores + structure filenames in descending order (higher score = better Ab-Ag interface)
-abepiscore_scores, filepaths = eval_abags.abepiscore()
-idxs = torch.argsort(abepiscore_scores, descending=True)
-for idx in idxs:
-    abepiscore_score, filepath = abepiscore_scores[idx], filepaths[idx]
-    filename = filepath.name
-    print(f"AbEpiScore-1.0 {abepiscore_score} Filename: {filename}")
-
-# compute sorted AbEpiTarget-1.0 scores + structure filenames in descending order (higher score = higher antibody target probability) 
-abepitarget_scores, filepaths = eval_abags.abepitarget()
-idxs = torch.argsort(abepitarget_scores, descending=True)
-for idx in idxs:
-    abepitarget_score, filepath = abepitarget_scores[idx], filepaths[idx]
-    filename = filepath.name
-    print(f"AbEpiTarget-1.0 {abepitarget_score} Filename: {filename}")
-
-# compute all output files
+# intialize antibody-antigen complex evalaution object 
+eval_abags = EvalAbAgs(data)
+# compute AbEpiScore-1.0 and AbEpiTarget-1.0 scores for antibody-antigen complex structures at set antibody-antigen Å distance  
+# save results output files (see 'Outputs')
 outdir = Path.cwd() / "output"
 eval_abags.predict(outdir)
-
 ```
