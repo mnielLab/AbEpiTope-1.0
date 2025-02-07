@@ -66,10 +66,9 @@ data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR))
 # data = StructureData()
 # data.encode_proteins(STRUCTUREINPUTS, ENCDIR, TMPDIR, atom_radius=4.5)
 
-# intialize antibody-antigen complex evalaution object 
-eval_abags = EvalAbAgs(data)
-# compute AbEpiScore-1.0 and AbEpiTarget-1.0 scores for antibody-antigen complex structures at set antibody-antigen Å distance  
+# compute AbEpiScore-1.0 and AbEpiTarget-1.0 scores for antibody-antigen complex structures at set antibody-antigen Å distance 
 # save results output files (see 'Outputs')
+eval_abags = EvalAbAgs(data)
 outdir = Path.cwd() / "output"
 eval_abags.predict(outdir)
 ```
