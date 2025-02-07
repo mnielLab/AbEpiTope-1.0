@@ -57,7 +57,7 @@ from abepitope.main import StructureData, EvalAbAgs
 from pathlib import Path
 STRUCTUREINPUTS = Path.cwd() / "abag_exampledata" / "Cancer" # directory containing PDB or CIF files (can also be a single PDB/CIF file)
 ENCDIR = Path.cwd() / "encodings" # directory for storing ESM-IF1 encodings
-TMPDIR = Path.cwd() / "temporary" # directort for storing temporary files 
+TMPDIR = Path.cwd() / "temporary" # directory for storing temporary files 
 
 # create 4Å (default) distance antibody-antigen interface esmif1 encodings of structure files
 data = StructureData()
