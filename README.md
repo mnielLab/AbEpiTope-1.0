@@ -26,21 +26,18 @@ $ pip install -r requirements.txt #install package dependencies
 $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
 ```
 ### Usage 
-We provide an example script (demo.py) and notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
-These predicted structures can found under ./abag_exampledata/Cancer,
 
-## Input
+## Inputs 
+
 AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif). These structure files can be solved or predicted structures.
 1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
-2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected.  
+2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected. By default, thet distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
-This code will generate encodings for all antibody-antigen interfaces found downstream in /path/to/structure_file(s)/.
-The full encodings are stored at /path/to/store/encodings/. 
+## Run
+We provide an example script (demo.py) and a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
+These predicted structures can found under ./abag_exampledata/Cancer. 
 
-$ data = StructureData()
-$ data.encode_proteins(/path/to/structure_file(s)/, /path/to/store/encodings/, /path/to/temporary/)
-
-After having generated encodings of the antibody-antigen complex interfaces, they can be scored with AbEpiTope-1.0. 
+After this step, antibody-antigen complex interfaces, can be scored with AbEpiTope-1.0. 
 $ eval_abags = EvalAbAgs(data)
 $ eval_abags.predict(/path/to/output/)
 
