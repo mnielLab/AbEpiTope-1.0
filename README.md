@@ -35,12 +35,12 @@ AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif).
 1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
 2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected. By default, thet distance is set at 4 Å, but can be set to custom Angstrom (Å). 
 
-```
-Example code show how antibody-antigen complex strucute files can be encoded using the deafault Å distance.
-$ from abepitope.main import StructureData
-$ data = StructureData()
-$ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff)
-To run with another Å distance, such as 4.5, instead run,
+```python 
+# encode antibody-antigen complex structure files at default 4 Å distance.
+from abepitope.main import StructureData
+data = StructureData()
+data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff)
+# encode antibody-antigen complex structure files 4.5 Å distance.
 $ data = StructureData()
 $ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff, atom_radius=4.5)
 ```
