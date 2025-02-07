@@ -62,21 +62,17 @@ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/,
 data = StructureData()
 data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/, /path/to/store/temporary/stuff, atom_radius=4.5)
 
-# compute AbEpiscore-1.0 scores only
+# compute sorted AbEpiscore-1.0 scores + structure filenames in descending order (higher score = better Ab-Ag interface)
 abepiscore_scores, filepaths = eval_abags.abepiscore()
-# sort scores in descending order (higher score = better Ab-Ag interface)
 idxs = torch.argsort(abepiscore_scores, descending=True)
-# print scores along with corresponding filenames
 for idx in idxs:
     abepiscore_score, filepath = abepiscore_scores[idx], filepaths[idx]
     filename = filepath.name
     print(f"AbEpiScore-1.0 {abepiscore_score} Filename: {filename}")
 
-# compute AbEpiTarget-1.0 scores only 
+# compute sorted AbEpiTarget-1.0 scores + structure filenames in descending order (higher score = higher antibody target probability) 
 abepitarget_scores, filepaths = eval_abags.abepitarget()
-# sort scores in descending order (higher score = better Ab-Ag interface)
 idxs = torch.argsort(abepitarget_scores, descending=True)
-# print scores along with corresponding filenames
 for idx in idxs:
     abepitarget_score, filepath = abepitarget_scores[idx], filepaths[idx]
     filename = filepath.name
