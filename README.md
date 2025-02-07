@@ -4,6 +4,9 @@ AbEpiTope-1.0 is a computational tool that features two scores: AbEpiScore-1.0, 
 ## License
 AbEpiTope-1.0 was developed by the Health Tech section at Technical University of Denmark (DTU). The code and data can be used freely by academic groups for non-commercial purposes. If you plan to use these tools for any for-profit application, you are required to obtain a separate license (contact Morten Nielsen, morni@dtu.dk).
 
+## Webserver
+AbEpiTope-1.0 is freely available as a web server at [https://services.healthtech.dtu.dk/services/AbEpiTope-1.0.](https://services.healthtech.dtu.dk/services/AbEpiTope-1.0). 
+
 ## Installation 
 It is important that you follow the steps and do not install a latest pytorch and cudatoolkit version. 
 The reason is that we need the installation to be compatible with a Pytorch Geometric.
