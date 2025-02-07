@@ -26,16 +26,25 @@ $ pip install -r requirements.txt #install package dependencies
 $ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
 ```
 ### Usage 
-We provide a python code snippet hereunder as well as a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
-These predicted structures can found under ./abag_exampledata/Cancer. 
 
 ## Inputs 
-
 AbEpiTope-1.0 evaluates structure files of antibody-antigen complexes (pdb/cif). These structure files can be solved or predicted structures.
-1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
-2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected. By default, thet distance is set at 4 Å, but can be set to custom Angstrom (Å). 
+1. Each structure file must include a light and heavy chain or a single-chain variable fragment (scFv), along with one or more antigen chains. Light and heavy chains are automatically detected. **Note:** Scores will not be produced for antibody-antigen structures where an where this is not detected. 
+2. The antibody-antigen interface is made up of epitope and paratope residues. We define epitope residues as any antigen residues with at least one heavy atom (main-chain or side-chain) at a distance of 4 Å or less to any light or heavy chain. The corresponding interacting residues on the light or heavy chain are the paratope residues. **Note:** Scores will not be produced if epitope and paratope residues are not detected at the set Å distance.. By default, this distance is set at 4 Å, but can be set to custom Angstrom (Å). 
+
+## Outputs 
+The tool can output a total four output files. 
+1. The first, output.csv, is the most useful output file that lists each input structure file along with its AbEpiScore-1.0 and AbEpiTarget-1.0 scores.
+   These scores are not sorted.
+   * Higher AbEpiscore-1.0 Score = More accurate antibody-antigen interface.
+   * Higher AbEpiTarget-1.0 Score = Higher probability that the antibody targets the antigen.   
+2. The second, interface.csv, lists each input structure file along with epitope and paratope residues used to compute these scores **Note:** If a row contains "None" in any column, it indicates that no antibody was identified, or no AbAg interface was detected within the specified Å distance.
+3. The third, abag_sequence_data.fasta, is a fasta formmatted file containing the sequences in each each antibody-antigen complex. The header >FILENAME_CHAINNAMES and the sequences of each abag are joined with ':'.
+4. The fourth, failed_files.csv, is an error file that only appears if an error occurs for one or more of the files in the zip file upload. Each row contains filename and reason for the error.
 
 ## Example
+We provide a python code snippet hereunder as well as a notebook (demo_notebook.ipynb) for running AbEpiTope-1.0 on 30 AlphaFold-2.3 predicted strucutures of antibody targeting the PD1-receptor (PDB: 7E9B).
+These predicted structures can found under ./abag_exampledata/Cancer. 
 
 ```python
 # imports and static stuff
@@ -56,31 +65,28 @@ data.encode_proteins(/path/to/structure(s), /path/to/store/temporary/encodings/,
 
 ## evaluate antibody-antigen complexes ## 
 
-# compute abepiscore-1.0 scores only
+# compute AbEpiscore-1.0 scores only
+abepiscore_scores, filepaths = eval_abags.abepiscore()
+# sort scores in descending order (higher score = better Ab-Ag interface)
+idxs = torch.argsort(abepiscore_scores, descending=True)
+# print scores along with corresponding filenames
+for idx in idxs:
+    abepiscore_score, filepath = abepiscore_scores[idx], filepaths[idx]
+    filename = filepath.name
+    print(f"AbEpiScore-1.0 {abepiscore_score} Filename: {filename}")
 
-# compute abepitarget-1.0 scores only
+# compute AbEpiTarget-1.0 scores only 
+abepitarget_scores, filepaths = eval_abags.abepitarget()
+# sort scores in descending order (higher score = better Ab-Ag interface)
+idxs = torch.argsort(abepitarget_scores, descending=True)
+# print scores along with corresponding filenames
+for idx in idxs:
+    abepitarget_score, filepath = abepitarget_scores[idx], filepaths[idx]
+    filename = filepath.name
+    print(f"AbEpiTarget-1.0 {abepitarget_score} Filename: {filename}")
 
-# compute both scores and store scores in .csv file together with other files 
-
+# compute all output files
+outdir = Path.cwd() / "output"
+eval_abags.predict(outdir)
 
 ```
-
-## Run
-
-After this step, antibody-antigen complex interfaces, can be scored with AbEpiTope-1.0. 
-```
-$ eval_abags = EvalAbAgs(data)
-$ eval_abags.predict(/path/to/output/)
-```
-The resulting 
-
-
-3. Users can set a custom Angstrom (Å) distance for defining antibody-antigen interfaces.
-
-The default is 4 Å. 
-Note: Scores will not be produced for antibody-antigen structures if no epitope and paratope residues are detected at the set Å distance.
-
-
-
-
-
