@@ -77,9 +77,9 @@ eval_abags.predict(outdir)
 
 * **Predicting modelled AbAg Accuracy with AbEpiScore-1.0, A) and B):** A modelled antibody-antigen structure with an AbEpiScore-1.0 of 0.3, has an expected interface accuracy 0.3 ≈ 0.400 DockQ or ≈0.373 AbAgIoU.
 * **Predicting modelled AbAg Accuracy with AbEpiScore-1.0, C):** A modelled antibody-antigen structure with an AbEpiScore-1.0 of 0.3, has a 91.2%, 83.9%, and 22.1% probability of having acceptable (≥0.23), medium (≥0.49) and high (≥0.8) DockQ interface accuracy respectively.
-* **High confidence antibody screening with AbEpiTarget-1.0, D):** For antigen groups (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.1544 more than the second best scoring antibody-antigen pair.
-* **Medium confidence antibody screening with AbEpiTarget-1.0, D):** For antigen groups (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0803 more than the second best scoring antibody-antigen pair.
-* **Low confidence antibody screening with AbEpiTarget-1.0, D):** For antigen groups (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0296 more than the second best scoring antibody-antigen pair.
+* **High confidence antibody screening with AbEpiTarget-1.0, D):** For an antigen group (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.1544 more than the second best scoring antibody-antigen pair.
+* **Medium confidence antibody screening with AbEpiTarget-1.0, D):** For an antigen group (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0803 more than the second best scoring antibody-antigen pair.
+* **Low confidence antibody screening with AbEpiTarget-1.0, D):** For an antigen group (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0296 more than the second best scoring antibody-antigen pair.
 
 
 
