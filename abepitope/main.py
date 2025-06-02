@@ -82,18 +82,24 @@ class DenseNet(nn.Module):
 ### CLASSES ###
 
 class StructureData():
-    def __init__(self):
+    def __init__(self, device = None):
         """
    
         """
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
     
-    def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4, esmif1_modelpath=None):
-        # a single pdb file
+    def encode_proteins(self, structure_directory, enc_directory, tmp_directory, atom_radius=4, esmif1_modelpath=None, encode_pdbs=True, encode_cifs=True):
+        # a single .pdb or .cif file
         if structure_directory.is_file(): structure_files = [structure_directory]
 
-        #directory with pdb files
+        # directory with .pdb or .cif files
         elif structure_directory.is_dir():
-            structure_files = list(structure_directory.glob("**/*.pdb")) + list(structure_directory.glob("**/*.PDB")) + list(structure_directory.glob("**/*.cif")) + list(structure_directory.glob("**/*.CIF"))
+            structure_files = []
+            if encode_pdbs: structure_files.extend( list(structure_directory.glob("**/*.pdb")) + list(structure_directory.glob("**/*.PDB")) )
+            if encode_cifs: structure_files.extend( list(structure_directory.glob("**/*.cif")) + list(structure_directory.glob("**/*.CIF")) )
 
         else:
             print(f"Structure(s) input did not exist. Not a file or a directory. Exiting!")
@@ -109,7 +115,7 @@ class StructureData():
 
         #this will load the esmif1 model + alphabet
         print("Loading ESM-IF1 model...")
-        esmif1_util = ESMIF1Model(esmif1_modelpath=esmif1_modelpath)
+        esmif1_util = ESMIF1Model(esmif1_modelpath=esmif1_modelpath, device=self.device)
         print("Loading ESM-IF1 model... DONE")
 
     
