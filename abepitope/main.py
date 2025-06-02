@@ -21,12 +21,12 @@ ABEPITARGET_MODELS = MODELS_DIRECTORY / "abepitarget1.0"
 AB_IDENTIFY_HMM_MODELS = MODELS_DIRECTORY / "hmm_antibody_identification"
 
 ### SET GPU OR CPU ###
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-    print(f"GPU device detected: {device}")
-else:
-    device = torch.device("cpu")
-    print(f"GPU device not detected. Using CPU: {device}")
+# if torch.cuda.is_available():
+#     device = torch.device("cuda")
+#     print(f"GPU device detected: {device}")
+# else:
+#     device = torch.device("cpu")
+#     print(f"GPU device not detected. Using CPU: {device}")
 
 ### MODEL ###
 
@@ -43,7 +43,13 @@ class DenseNet(nn.Module):
                  fc1_dropout = 0.6,
                  fc2_dropout = 0.65,
                  fc3_dropout = 0.5,
-                 num_classes = 1):
+                 num_classes = 1, device=None):
+        
+
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
 
         super(DenseNet, self).__init__()
         self.fc1_size = fc1_size
@@ -73,7 +79,7 @@ class DenseNet(nn.Module):
         """
 
         x = torch.stack(X)
-        x = x.to(device)
+        x = x.to(self.device)
         output = self.ff_model(x)
 
         return output
@@ -95,7 +101,7 @@ class StructureData():
         # a single .pdb or .cif file
         if structure_directory.is_file(): structure_files = [structure_directory]
 
-        # directory with .pdb or .cif files
+        #directory with pdb or cif files
         elif structure_directory.is_dir():
             structure_files = []
             if encode_pdbs: structure_files.extend( list(structure_directory.glob("**/*.pdb")) + list(structure_directory.glob("**/*.PDB")) )
@@ -248,7 +254,7 @@ class EvalAbAgs():
         """
         
         print("Running AbEpiScore-1.0")
-        model = DenseNet().to(device)
+        model = DenseNet(device=self.device).to(self.device)
         modelstates = list(ABEPISCORE_MODELS.glob("*"))
         nr_models = len(modelstates)
         interface_encs = self.structuredata.esmif1_interface_encs
@@ -280,9 +286,9 @@ class EvalAbAgs():
         """
 
         print("Running AbEpiTarget-1.0...")
-        model = DenseNet(fc1_size=450, fc2_size=250, fc3_size=50, num_classes=2).to(device)
+        model = DenseNet(fc1_size=450, fc2_size=250, fc3_size=50, num_classes=2, device=self.device).to(self.device)
         modelstates = list(ABEPITARGET_MODELS.glob("*"))
-        softmax_function = nn.Softmax(dim=1).to(device)          
+        softmax_function = nn.Softmax(dim=1).to(self.device)          
 
         nr_models = len(modelstates)
         interface_encs = self.structuredata.esmif1_interface_encs
