@@ -114,7 +114,8 @@ class StructureData():
         esmif1_enc_files, esmif1_interface_encs, abag_sequence_data = [], [], []
         abseq_type_lookup = {}
         epitope_datas, paratope_datas = [], []
-        success_files, failed_files = [], [] 
+        success_files, failed_files = [], []
+        heavy_light_letters = ["H","L"]
 
         if not enc_directory.is_dir(): enc_directory.mkdir(parents=True)
         if not tmp_directory.is_dir(): tmp_directory.mkdir(parents=True)
@@ -153,9 +154,9 @@ class StructureData():
             heavy_chain, light_chain, antigen_chains = identify_abag_with_hmm(structure_file, AB_IDENTIFY_HMM_MODELS, structure_tmp_directory, pdb_id=structure_file.stem, verbose=False, abseq_type_lookup=abseq_type_lookup)
             antibody_chains = heavy_chain + light_chain
             # add sequences to lookup
-            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[antibody_chains[0].get_id()]] ] = "H"
-            abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[antibody_chains[1].get_id()]] ] = "L"
-            
+            for i in range(len(antibody_chains)):
+                abseq_type_lookup[ esmif1_seqs[enc_idx_lookup[antibody_chains[i].get_id()]] ] = heavy_light_letters[i]
+                
             # remove temporary dir + files
             for f in structure_tmp_directory.glob("*"): f.unlink()
             structure_tmp_directory.rmdir()            
