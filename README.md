@@ -41,8 +41,10 @@ AbEpiTope-1.0 outputs a the following three output files.
    These scores are not sorted.
    * Higher AbEpiscore-1.0 Score = More accurate antibody-antigen interface.
    * Higher AbEpiTarget-1.0 Score = Higher probability that the antibody targets the antigen.   
-2. The second, **interface.csv**, lists each input structure file along with epitope and paratope residues used to compute these scores **Note:** If a row contains "None" in any column, it indicates that no antibody was identified, or no AbAg interface was detected within the specified Å distance.
-3. The third, **abag_sequence_data.fasta**, is a fasta formmatted file containing the sequences in each each antibody-antigen complex. The header >FILENAME_CHAINNAMES and the sequences of each abag are joined with ':'.
+2. The second, **interface.csv**, lists each input structure file along with epitope and paratope residues used to compute these scores
+   **Note:** If a row contains "None" in any column, it indicates that no antibody was identified, or no AbAg interface was detected within the specified Å distance.
+   **Note:** You may see duplicate rows for the same epitope-paratope residue pair. This is expected and reflects multiple distinct atomic interactions between those residues.
+4. The third, **abag_sequence_data.fasta**, is a fasta formmatted file containing the sequences in each each antibody-antigen complex. The header >FILENAME_CHAINNAMES and the sequences of each abag are joined with ':'.
 
 An additional fourth output file, **failed_files.csv**, may also be outputted. This an error file that only appears if an error occurs for one or more of input files. Each row contains filename and reason for the error.
 
