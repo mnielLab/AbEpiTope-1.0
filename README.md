@@ -7,6 +7,9 @@ Both use the pretrained inverse folding model, ESM-IF1. As input, both models ex
 ## License
 AbEpiTope-1.0 was developed by the Health Tech section at Technical University of Denmark (DTU). The code and data can be used freely by academic groups for non-commercial purposes. If you plan to use these tools for any for-profit application, you are required to obtain a separate license (contact Morten Nielsen, morni@dtu.dk).
 
+## Graphical Abstract 
+![Screenshot](AbEpiTopeGraphicalAbstract.png)
+
 ## Webserver
 AbEpiTope-1.0 is freely available as a web server at [https://services.healthtech.dtu.dk/services/AbEpiTope-1.0.](https://services.healthtech.dtu.dk/services/AbEpiTope-1.0). 
 
