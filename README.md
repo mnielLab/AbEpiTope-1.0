@@ -86,7 +86,5 @@ eval_abags.predict(outdir)
 * **Medium confidence antibody screening with AbEpiTarget-1.0, D):** For an antigen group (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0803 more than the second best scoring antibody-antigen pair.
 * **Low confidence antibody screening with AbEpiTarget-1.0, D):** For an antigen group (antibodies modelled to the same antigen), only predict the highest scoring antibody-antigen pair as the correct antibody, if its AbEpiTarget-1.0 score is 0.0296 more than the second best scoring antibody-antigen pair.
 
-
-
-
-
+## Cite
+If you found AbEpiTope-1.0 useful in your research, please cite [paper](https://doi.org/10.1126/sciadv.adu1823).
