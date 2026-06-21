@@ -7,8 +7,8 @@ setup(
     include_package_data=True,  # Include non-code files specified in MANIFEST.in
     package_data={
         'abepitope': [
-            'models/abepiscore1.0/*.pt',  # Include all .pt files for AntiInterNet-1.0
-            'models/abepitarget1.0/*.pt',  # Include all .pt files for AntiScout-1.0
+            'models/abepiscore1.0/*.pt',  # Include all .pt files for AbEpiScore-1.0
+            'models/abepitarget1.0/*.pt',  # Include all .pt files for AbEpiTarget-1.0
             'models/hmm_antibody_identification/*.hmm' # include hmm models for antibody identification
         ]
     },

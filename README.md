@@ -13,24 +13,46 @@ AbEpiTope-1.0 was developed by the Health Tech section at Technical University o
 ## Webserver
 AbEpiTope-1.0 is freely available as a web server at [https://services.healthtech.dtu.dk/services/AbEpiTope-1.0.](https://services.healthtech.dtu.dk/services/AbEpiTope-1.0). 
 
-## Installation 
-It is important that you follow the steps and do not install a latest pytorch and cudatoolkit version. 
-The reason is that we need the installation to be compatible with a Pytorch Geometric.
+## Installation
 
-### Create Conda Environment
+AbEpiTope-1.0 depends on a specific PyTorch, CUDA, and PyTorch Geometric stack. Installing newer versions may result in compatibility issues.
+
+### Install uv
 ```
-$ conda create -n inverse python=3.9 ## important that it is python version 3.9
-$ conda activate inverse
-$ conda install pytorch=1.11 cudatoolkit=11.3 -c pytorch   ## very important to specify pytorch package!
-$ conda install pyg -c pyg -c conda-forge ## very important to make sure pytorch and cuda versions not being changed
-$ conda install pip
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-### Install Pip Packages 
+### Create Environment and Install Dependencies
+
+From the repository root:
 ```
-First, download requirements.txt file. Then,
-$ pip install -r requirements.txt #install package dependencies
-$ pip install git+https://github.com/mnielLab/AbEpiTope-1.0.git #install source code directly with pip
+$ uv sync
 ```
+This will create a local virtual environment in .venv and install all required dependencies defined in pyproject.toml.
+
+### Configure CUDA Runtime Libraries
+PyTorch Geometric requires CUDA runtime libraries that are not automatically added to the library search path when installed through uv.
+Append the following lines to .venv/bin/activate:
+
+```
+cat >> .venv/bin/activate <<'EOF'
+
+# AbEpiTope CUDA runtime libraries
+export LD_LIBRARY_PATH="$VIRTUAL_ENV/lib/python3.9/site-packages/nvidia/cusparse/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$VIRTUAL_ENV/lib/python3.9/site-packages/nvidia/cublas/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$VIRTUAL_ENV/lib/python3.9/site-packages/nvidia/cuda_runtime/lib:$LD_LIBRARY_PATH"
+EOF
+```
+
+After modifying the activation script, activate the environment:
+```
+$ source .venv/bin/activate
+```
+
+### Verify Installation
+```
+$ python -c "import torch; import torch_geometric; import esm; print(torch.__version__)"
+```
+
 ## Usage 
 
 ### Inputs 
