@@ -17,15 +17,20 @@ AbEpiTope-1.0 is freely available as a web server at [https://services.healthtec
 
 AbEpiTope-1.0 depends on a specific PyTorch, CUDA, and PyTorch Geometric stack. Installing newer versions may result in compatibility issues.
 
+### Clone this repository
+```
+git clone https://github.com/mnielLab/AbEpiTope-1.0.git
+```
+
 ### Install uv
 ```
-$ curl -LsSf https://astral.sh/uv/install.sh | sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 ### Create Environment and Install Dependencies
 
 From the repository root:
 ```
-$ uv sync
+uv sync
 ```
 This will create a local virtual environment in .venv and install all required dependencies defined in pyproject.toml.
 
@@ -45,12 +50,12 @@ EOF
 
 After modifying the activation script, activate the environment:
 ```
-$ source .venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### Verify Installation
 ```
-$ python -c "import torch; import torch_geometric; import esm; print(torch.__version__)"
+python -c "import torch; import torch_geometric; import esm; print(torch.__version__)"
 ```
 
 ## Usage 
